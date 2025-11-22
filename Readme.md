@@ -11,6 +11,8 @@ desenvolvimento do MVP Tech4Um (Forum de mensagens em tempo real).
 - [Estrutura do Projeto](#estrutura-do-projeto)
 - [Engenharia de Software](#engenharia-de-software)
     - [Requisitos](#1-requisitos)
+        - [Funcioais](#1.1-funcionais)
+        - [Não Funcionais](#1.2-nao-funcionais)
     - [Diagramas](#2-diagramas)
         - [Sequencia](#2.1-sequencia)
         - [Estado](#2.2-estado)
@@ -70,7 +72,23 @@ Tech4Um-Grupo02/
 ├── package.json                  # Configurações do monorepo (workspaces pnpm) e scripts globais
 └── pnpm-lock.yaml                # Lockfile do pnpm para a raiz do monorepo
 ```
+---
 
+## Engenharia de Software
+Engenharia de software é uma metodologia ao todo para um processo 
+de organização de requisitos até a entrega de um MVP. Será utilizado essa 
+metodologia com o intuito de criar um aplicativo focado em: *Manutenção*, 
+*Confiabilidade e segurança*, *Eficiência* e *Aceitabilidade*
+
+### 1 Requisitos
+
+### 2 Diagramas
+Na engenharia de software, os diagramas são representações visuais utilizadas para simplificar e modelar sistemas complexos. Eles funcionam como uma "planta baixa" do software, permitindo que desenvolvedores, arquitetos e clientes visualizem a estrutura, o comportamento e as interações do sistema antes e durante a codificação.
+
+#### 2.1 Sequencia
+
+
+#### 2.2 Estado
 ---
 
 ## Tecnologias Utilizadas
