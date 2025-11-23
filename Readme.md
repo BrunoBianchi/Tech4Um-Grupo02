@@ -11,11 +11,11 @@ desenvolvimento do MVP Tech4Um (Forum de mensagens em tempo real).
 - [Estrutura do Projeto](#estrutura-do-projeto)
 - [Engenharia de Software](#engenharia-de-software)
     - [Requisitos](#1-requisitos)
-        - [Funcioais](#1.1-funcionais)
-        - [Não Funcionais](#1.2-nao-funcionais)
+        - [Funcionais](#11-requisitos-funcionais)
+        - [Não Funcionais](#12-requisitos-não-funcionais)
     - [Diagramas](#2-diagramas)
-        - [Sequencia](#2.1-sequencia)
-        - [Estado](#2.2-estado)
+        - [Sequencia](#21-sequencia)
+        - [Estado](#22-estado)
 - [Tecnologias Utilizadas](#tecnologias-utilizadas)
     - [Geral](#1-geral)
     - [Backend](#2-backend)
@@ -32,9 +32,10 @@ desenvolvimento do MVP Tech4Um (Forum de mensagens em tempo real).
 ## Visão Geral
 
 O **Tech4Um** é uma solução de forum online, composta por um Backend robusto 
-desenvolvido em **Linguagem Backend** e um Frontend moderno seguindo
-a prototipagem oficial no [Figma](https://www.figma.com/design/FDYqPAYNQTwOnHf0wME0HR/4UM?node-id=0-1&p=f) 
-construído em **Framework frontend**
+desenvolvido em **Node.js e Typescript** e um Frontend moderno seguindo
+a prototipagem oficial no [**Figma**](https://www.figma.com/design/FDYqPAYNQTwOnHf0wME0HR/4UM?node-id=0-1&p=f) 
+construído em **React**, respeitando toda a documentação do aplicativo
+no [**Google Docs**](https://docs.google.com/document/d/1fxOYiqd5Zhbin8a70hsNzNpU5sAz1zOyDZ1jJxWeh8U/edit?tab=t.0)
 
 ---
 
@@ -82,13 +83,58 @@ metodologia com o intuito de criar um aplicativo focado em: *Manutenção*,
 
 ### 1 Requisitos
 
+#### 1.1 Requisitos Funcionais
+
+Os requisitos funcionais descrevem os comportamentos e as ações específicas que o sistema deve executar. Eles estão organizados por módulos:
+
+**Módulo de Gestão de Identidade**
+* **RF01 - Cadastro:** O sistema deve permitir o registro de novos usuários (Register).
+* **RF02 - Autenticação:** O sistema deve permitir o acesso via credenciais de e-mail e senha (Login).
+* **RF03 - Encerramento:** O sistema deve permitir o encerramento seguro da sessão (Logout).
+
+**Módulo de Fóruns**
+* **RF04 - Listagem:** O sistema deve exibir uma lista paginada dos fóruns disponíveis.
+* **RF05 - Criação:** O sistema deve permitir que usuários autenticados criem novos tópicos de fórum.
+
+**Módulo de Chat**
+* **RF06 - Mensagens:** O sistema deve permitir o envio e recebimento de mensagens públicas e privadas.
+* **RF07 - Participantes:** O sistema deve listar os participantes ativos no chat.
+* **RF08 - Visibilidade:** O sistema deve oferecer uma opção para ocultar ou exibir a lista de participantes.
+
+---
+
+#### 1.2 Requisitos Não Funcionais
+
+Os requisitos não funcionais definem os critérios de qualidade e as restrições técnicas do sistema, servindo como métricas para avaliar *como* o software deve operar:
+
+**Segurança**
+* **RNF01 - Autenticação Robusta:** O controle de sessão deve utilizar o padrão **JWT (JSON Web Token)**, garantindo integridade e estatelessness.
+* **RNF02 - Proteção de Dados:** As senhas devem ser armazenadas no banco de dados utilizando **Hashing seguro** (ex: Bcrypt ou Argon2).
+* **RNF03 - Privacidade:** As mensagens privadas devem trafegar com **criptografia de ponta a ponta**.
+
+**Desempenho e Arquitetura**
+* **RNF04 - Tempo Real:** A comunicação do chat deve utilizar **WebSockets** para garantir baixa latência na entrega de mensagens.
+* **RNF05 - Padrão de API:** A interface de programação (backend) deve ser segura e seguir padrões arquiteturais definidos (ex: RESTful).
+
+**Usabilidade (UX)**
+* **RNF06 - Interface Responsiva:** A interface gráfica deve ser intuitiva e adaptar-se automaticamente a diferentes tamanhos de tela (Desktop e Mobile).
+
+---
+
 ### 2 Diagramas
 Na engenharia de software, os diagramas são representações visuais utilizadas para simplificar e modelar sistemas complexos. Eles funcionam como uma "planta baixa" do software, permitindo que desenvolvedores, arquitetos e clientes visualizem a estrutura, o comportamento e as interações do sistema antes e durante a codificação.
 
 #### 2.1 Sequencia
 
+Um diagrama de sequência, em engenharia de software, é um diagrama UML que mostra como os objetos/atores de um sistema trocam mensagens ao longo do tempo para realizar um caso de uso específico, destacando a ordem em que essas interações acontecem.
+
 
 #### 2.2 Estado
+
+Em engenharia de software, um diagrama de estados (ou diagrama de máquina de estados UML) mostra os possíveis estados de um objeto ao longo do seu ciclo de vida e as transições entre esses estados em resposta a eventos.
+
+![Diagrama de estado](https://i.imgur.com/AKRirn2.jpeg)
+
 ---
 
 ## Tecnologias Utilizadas
@@ -103,9 +149,17 @@ Na engenharia de software, os diagramas são representações visuais utilizadas
 
 ## Backend
 
+Esta seção do documento trata resumidamente do papel do backend na nossa 
+aplicação, para características mais técnicas temos um Readme Dedicado ao
+[**Backend**](https://github.com/BrunoBianchi/Tech4Um-Grupo02/tree/main/Backend)
+
 ---
 
 ## Frontend
+
+Esta seção do documento trata resumidamente do papel do frontend na nossa 
+aplicação, para características mais técnicas temos um Readme Dedicado ao
+[**Frontend**](https://github.com/BrunoBianchi/Tech4Um-Grupo02/tree/main/Frontend)
 
 ---
 
