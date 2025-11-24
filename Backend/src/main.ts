@@ -3,6 +3,7 @@ import * as dotenv from "dotenv"
 import "reflect-metadata";
 import { AppDataSource } from "./config/database/datasource.ts";
 import {r as api} from "./controllers/api-controller.ts"
+import { errorMiddleware } from "./middlewares/error-middleware.ts";
 dotenv.config({
     quiet:true,
 })
@@ -11,7 +12,7 @@ const port= process.env.EXPRESS_PORT || 3000
 
 app.use(express.json());
 app.use('/api',api)
-
+app.use(errorMiddleware)
 AppDataSource.initialize().then(()=>{
     console.log(`Database Connected at port 5432!`)
     app.listen(port,()=>{

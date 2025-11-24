@@ -1,19 +1,30 @@
 import  { Router } from "express";
 import z from "zod"
-import { validator } from "../middlewares/validateSchema-middleware.ts";
+import { createUser } from "../services/user/create-service.ts";
+import { generateToken } from "../services/jwt/create-service.ts";
+import { validateCredentials } from "../services/user/validateCredentials-service.ts";
 const router:Router = Router()
 
 
-router.post("/login",(req,res)=>{
-
+router.post("/login",async(req,res)=>{
+        const {email,password} = z.object({
+        email:z.email(),
+        password:z.string().min(6)
+    }).parse(req.body)
+    const user = await validateCredentials(email,password);
+    const token = await generateToken(user)
+    res.status(201).json({status:200,token})
 })
 
-router.post("/register",(req,res,next)=>{
-    validator(req,res,next,[{
+router.post("/register",async (req,res)=>{
+    const schema = z.object({
         name:z.string(),
         email:z.email(),
         password:z.string().min(6)
-    }],'body')
+    }).parse(req.body)
+    const user = await createUser(schema)
+    const token = await generateToken(user)
+    res.status(201).json({status:200,token})
 })
 
 

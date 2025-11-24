@@ -17,12 +17,12 @@ desenvolvimento do MVP Tech4Um (Forum de mensagens em tempo real).
         - [Sequencia](#21-sequencia)
         - [Estado](#22-estado)
 - [Tecnologias Utilizadas](#tecnologias-utilizadas)
-    - [Geral](#1-geral)
-    - [Backend](#2-backend)
-    - [Frontend](#3-frontend)
+    - [Github](#1-github)
+    - [JIRA](#2-jira)
+    - [Discord](#3-discord)
+    - [Docker](#4-docker)
 - [Backend](#backend)
 - [Frontend](#frontend)
-- [Software Utilizados em Geral](#softwares-utilizados)
 - [Instruções de Execução](#Instrucoes-de-Execucao)
 - [Agradecimentos](#agradecimentos)
 
@@ -139,7 +139,29 @@ Em engenharia de software, um diagrama de estados (ou diagrama de máquina de es
 
 ## Tecnologias Utilizadas
 
-### 1 Geral
+
+### 1 Github
+
+A utilização do [**Github**](https://github.com/BrunoBianchi/Tech4Um-Grupo02) se deu principalmente no processo de versionamento do código, foi utilizando uma estrutura focada em features, ou seja a criação de uma nova branch aninhada com o [**JIRA**](#12-jira) para cada uma das features, possibilitando o rollback caso necessário.
+
+![Imagem Branchs Github](https://i.imgur.com/mM71AEf.png)
+
+### 2 JIRA
+
+A utilização do [**JIRA**](https://bruno2002raiado.atlassian.net/jira/software/projects/KAN/boards/1/timeline?selectedIssue=KAN-7) se deu principalmente no processo de organização temporal das features, separadas em 2 épicos: Backend e Frontend. Com  ele foi possível orquestrar o tempo de desenvolvimento bem como checkpoints pessoais do grupo.
+
+![Imagem do Kanban Jira](https://i.imgur.com/Aav9D41.png)
+
+### 3 Discord
+
+O **Discord** foi utilizado como o principal meio de comunicação entre nosso grupo e os mentores, com ele conseguimos realizar reuniões periódicas para discussões no processo de desenvolvimento.
+
+### 4 Docker
+
+O **Docker** foi utilizado com o arquivo **compose** para a modelagem e execução facilitada em qualquer sistema operacional, sem a necessidade de conexões extras.
+
+---
+
 
 ### 2 Backend
 
@@ -153,6 +175,7 @@ Esta seção do documento trata resumidamente do papel do backend na nossa
 aplicação, para características mais técnicas temos um Readme Dedicado ao
 [**Backend**](https://github.com/BrunoBianchi/Tech4Um-Grupo02/tree/main/Backend)
 
+> Optamos por uma arquitetura utilizando padrão Orientada a Dados (Data-Driven) e um estilo de repositórios MSC (Model-Service-Controller)
 ---
 
 ## Frontend
@@ -161,16 +184,10 @@ Esta seção do documento trata resumidamente do papel do frontend na nossa
 aplicação, para características mais técnicas temos um Readme Dedicado ao
 [**Frontend**](https://github.com/BrunoBianchi/Tech4Um-Grupo02/tree/main/Frontend)
 
----
-
-## Softwares Utilizados 
-
-- [Jira](https://www.atlassian.com/br/software/jira) (Organização das sprints)
-- [Github](https://github.com) (Vercionamento do código)
-- [Docker](https://www.docker.com) (Containerização da aplicação)
-- [Discord](https://discord.com) (Canal para comunicação e reuniões)
+> O frontend utiliza react (SPA) + arquitetura básica do vite e react router para facilidade de renderização de diferentes informações.
 
 ---
+
 
 ## Instruções de Execução
 
