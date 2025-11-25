@@ -11,7 +11,7 @@ dotenv.config({
 const port= process.env.EXPRESS_PORT || 3000
 
 io.on('connection', (socket) => {
-  console.log('a user connected');
+  console.log(socket);
 });
 
 export const initializeSocketServer = (app:express.Express)=>{
