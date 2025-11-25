@@ -12,4 +12,6 @@ export class UserEntity extends BaseEntity {
     async hashPassword() {
         this.password = await bcrypt.hashSync(this.password,10)
     }
+    @Column()
+    email!:string;
 }

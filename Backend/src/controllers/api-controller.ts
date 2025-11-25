@@ -5,6 +5,8 @@ const router:Router = Router()
 
 router.use('/auth',authRoute)
 router.get("/health",(req,res,next)=>{
-    res.json("API Working!")
+    res.json("Api Router Working!")
 })
+
+
 export const r = router;
