@@ -1,15 +1,15 @@
-import { Column } from "typeorm";
+import { Column, Entity } from "typeorm";
 import { BaseEntity } from "./BaseEntity.ts";
 
-
+@Entity()
 export class MessageEntity extends BaseEntity {
-    @Column()
+    @Column({ type: 'varchar' })
     content!:string;
 
-    @Column()
+    @Column({ type: 'varchar' })
     ReplyToID!:string;
 
-    @Column()
+    @Column({ type: 'varchar' })
     destinationID!:string;    
 
 }

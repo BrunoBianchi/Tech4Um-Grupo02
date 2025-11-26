@@ -1,15 +1,15 @@
-import { Column } from "typeorm";
+import { Column, Entity } from "typeorm";
 import { BaseEntity } from "./BaseEntity.ts";
 
-
+@Entity()
 export class RoomEntity extends BaseEntity {
-    @Column()
+    @Column({ type: 'varchar' })
     name!:string;
 
-    @Column()
+    @Column({ type: 'varchar' })
     description!:string;
 
-    @Column()
+    @Column("text", { array: true })
     tags!:Array<string>
 
 }

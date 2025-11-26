@@ -3,15 +3,15 @@ import { BaseEntity } from "./BaseEntity.ts";
 import bcrypt from "bcrypt"
 @Entity()
 export class UserEntity extends BaseEntity {
-    @Column()
+    @Column({ type: 'varchar' })
     name!:string;
     
-    @Column()
+    @Column({ type: 'varchar' })
     password!:string;
     @BeforeInsert()
     async hashPassword() {
         this.password = await bcrypt.hashSync(this.password,10)
     }
-    @Column()
+    @Column({ type: 'varchar' })
     email!:string;
 }
