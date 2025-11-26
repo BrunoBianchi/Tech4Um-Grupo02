@@ -6,3 +6,9 @@ export const getUserByEmail= async (email:string):Promise<Partial<UserEntity> | 
         email:email
     }) as Partial<UserEntity>
 }
+
+export const getUserById = async(id:string):Promise<Partial<UserEntity> | null> => {
+    return await userRepository.findOneBy({
+        id:id
+    }) as Partial<UserEntity>
+}

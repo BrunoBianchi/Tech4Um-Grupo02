@@ -1,5 +1,7 @@
 import { DataSource } from "typeorm";
 import { UserEntity } from "../../models/UserEntity.ts";
+import { RoomEntity } from "../../models/RoomEntity.ts";
+import { MessageEntity } from "../../models/MessageEntity.ts";
 
 export const AppDataSource= new DataSource({
     type: "postgres",
@@ -8,7 +10,7 @@ export const AppDataSource= new DataSource({
     username: "postgres",
     password: "postgres",
     database: "",
-    entities:[UserEntity],
+    entities:[UserEntity,MessageEntity, RoomEntity],
     synchronize: true,
     logging: false
 })

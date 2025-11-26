@@ -3,7 +3,7 @@ import { createServer } from 'node:http';
 import express from 'express';
 import {Server} from "socket.io"
 const server = createServer(app);
-const io = new Server(server,{cors: { origin: "*" }})
+export const io = new Server(server,{cors: { origin: "*" }})
 import * as dotenv from "dotenv"
 import { verifyJWT } from '../../services/jwt/verify-service.ts';
 dotenv.config({
@@ -22,3 +22,4 @@ export const initializeSocketServer = (app:express.Express)=>{
         console.log(`Server Listening at port ${port}`)
     })
 }
+

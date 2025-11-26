@@ -3,7 +3,6 @@ import z from "zod"
 import { createUser } from "../services/user/create-service.ts";
 import { generateToken } from "../services/jwt/create-service.ts";
 import { validateCredentials } from "../services/user/validateCredentials-service.ts";
-import { omit } from "zod/mini";
 import type { UserEntity } from "../models/UserEntity.ts";
 const router:Router = Router()
 
