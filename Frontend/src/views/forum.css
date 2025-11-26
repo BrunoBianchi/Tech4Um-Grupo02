@@ -1,0 +1,186 @@
+.forum-wrapper {
+  width: 100%;
+  max-width: 1300px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+/* HEADER */
+.forum-header h1 {
+  font-size: 36px;
+  font-weight: bold;
+}
+
+.forum-header h2 {
+  font-size: 22px;
+  color: #555;
+  margin-bottom: 25px;
+}
+
+/* SEARCH BAR */
+.forum-search-area {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 40px;
+}
+
+.forum-search-area input {
+  flex: 1;
+  padding: 12px 15px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  font-size: 16px;
+}
+
+.search-btn {
+  width: 45px;
+  height: 45px;
+  border-radius: 8px;
+  border: none;
+  background-color: #1b75d1;
+  cursor: pointer;
+  color: white;
+}
+
+.create-btn {
+  padding: 12px 18px;
+  background-color: #1b75d1;
+  color: white;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* GRID */
+.forum-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 25px;
+}
+
+/* CARDS */
+.forum-card {
+  background: white;
+  padding: 20px;
+  border-radius: 18px;
+  box-shadow: 0 3px 15px rgba(0, 0, 0, 0.08);
+  position: relative;
+}
+
+.forum-card h3 {
+  font-size: 20px;
+  color: #0f4c81;
+  margin-bottom: 8px;
+}
+
+.forum-subinfo {
+  color: #777;
+  margin-bottom: 10px;
+}
+
+.forum-desc {
+  color: #555;
+  margin-bottom: 15px;
+}
+
+.forum-creator {
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+.forum-circle {
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+  background: #0f4c81;
+  color: white;
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* DESTAQUE */
+.destaque-text {
+  color: #e54c1b;
+  font-weight: bold;
+  margin-bottom: 10px;
+  display: block;
+}
+
+.destaque h3 {
+  color: #0f4c81;
+}
+
+
+/* MODAL STYLES */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.modal h3 {
+  margin-bottom: 20px;
+  color: #0f4c81;
+}
+
+.modal input,
+.modal textarea {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  box-sizing: border-box;
+}
+
+.modal textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.modal-actions button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.modal-actions button:first-child {
+  background: #f0f0f0;
+  color: #333;
+}
+
+.modal-actions button:last-child {
+  background: #1b75d1;
+  color: white;
+}
