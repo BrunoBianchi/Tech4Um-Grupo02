@@ -3,14 +3,16 @@ import { RoomEntity } from "../../models/RoomEntity.ts"
 import { UserEntity } from "../../models/UserEntity.ts";
 import { ApiError, APIErrors } from "../error/apiError-service.ts";
 import { decryptJWT } from "../jwt/decrypt-service.ts";
-import { io } from "../../config/socketio/socketio-server.ts";
+import { io } from "../../config/socketio/socket-instance.ts";
 
 const roomRepository = AppDataSource.getRepository(RoomEntity)
 const userRepository = AppDataSource.getRepository(UserEntity)
 
 export const joinRoom = async (roomId:string,socketId:string) => {
     const sockets = await io.sockets.fetchSockets();
-    const socket = sockets.find(s => s.id === socketId);
+    const socket = sockets.find(s =>{
+        return s.id == socketId
+    });
 
     if (!socket) {
         throw new ApiError(APIErrors.notFoundError, "Socket not found", 404);

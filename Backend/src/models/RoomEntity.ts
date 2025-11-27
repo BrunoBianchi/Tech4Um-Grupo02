@@ -9,7 +9,7 @@ export class RoomEntity extends BaseEntity {
     name!:string;
 
     @Column({ type: 'varchar' })
-    description!:string;
+    description?:string;
 
     @Column("text", { array: true })
     tags?:Array<string>

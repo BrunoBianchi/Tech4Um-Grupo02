@@ -3,3 +3,29 @@
 :root {
      font-family: "Poppins", sans-serif;
 }
+
+@keyframes ring-pulse-color {
+    0%, 100% {
+        box-shadow: 0 0 0 2px #d15757;
+    }
+    50% {
+        box-shadow: 0 0 0 2px rgba(255, 0, 0, 0.101);
+    }
+}
+
+.animate-ring-pulse {
+    animation: ring-pulse-color 2s ease-in-out infinite;
+}
+
+@keyframes ring-pulse-green {
+    0%, 100% {
+        box-shadow: 0 0 0 2px rgba(87, 209, 170, 1);
+    }
+    50% {
+        box-shadow: 0 0 0 2px rgba(87, 209, 170, 0.3);
+    }
+}
+
+.animate-ring-pulse-green {
+    animation: ring-pulse-green 2s ease-in-out infinite;
+}

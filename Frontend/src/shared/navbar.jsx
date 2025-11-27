@@ -3,6 +3,7 @@ import { useAuth } from '../hooks/auth-hook';
 import { useEffect, useState } from 'react';
 import LoginModal from './LoginModal';
 import { useSocket } from '../hooks/socket-hook';
+import Avatar, { genConfig } from 'react-nice-avatar';
 
 export default function Navbar() {
   const {login,signed,user, logout}= useAuth()
@@ -12,12 +13,12 @@ export default function Navbar() {
   return (
     <>
       <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} />
-      <nav className="w-full bg-[#F3F3F3] px-20 py-4 flex items-center justify-between shadow-sm">
+      <nav className="w-full bg-[#F3F3F3] px-4 md:px-20 py-4 flex items-center justify-between shadow-sm">
         
         <div className="flex items-center">
           <img src={logo} alt="Tech4Um Logo" className="h-12 mr-4" />
           
-          <span className="text-[#999] text-lg font-light ml-2 border-l border-transparent">
+          <span className="hidden md:block text-[#999] text-lg font-light ml-2 border-l border-transparent">
             Seu fórum sobre tecnologia!
           </span>
         </div>
@@ -39,8 +40,14 @@ export default function Navbar() {
           <div className="relative">
             <div 
               onClick={() => signed ? setIsDropdownOpen(!isDropdownOpen) : setIsLoginModalOpen(true)}
-              className="w-12 h-12 bg-[#b54512] rounded-full cursor-pointer hover:opacity-90 transition-opacity"
-            ></div>
+              className={`w-10 h-10 flex items-center justify-center text-white font-bold text-l ring-2 transition-all duration-500 ${isConnected ? "ring-[#57d1aa] animate-ring-pulse-green" : "ring-[orange] animate-ring-pulse"} bg-[#1b75d1] rounded-full cursor-pointer hover:opacity-90 overflow-hidden`}
+            >
+              {signed ? (
+                <Avatar className="w-full h-full" {...genConfig(user?.email || user?.name)} />
+              ) : (
+                "BR"
+              )}
+            </div>
 
             {signed && isDropdownOpen && (
               <div className="absolute right-0 mt-2 w-70 bg-white rounded-xl shadow-xl py-2 z-50 border border-gray-100 overflow-hidden">

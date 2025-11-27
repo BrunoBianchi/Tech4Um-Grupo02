@@ -90,18 +90,53 @@
   margin-top: 10px;
 }
 
-.forum-circle {
+.forum-avatars-stack {
   position: absolute;
   right: 20px;
   bottom: 20px;
+  display: flex;
+  align-items: center;
+  flex-direction: row-reverse; /* Stack from right to left or left to right? Image 2 shows left to right stack but +N at end. */
+  /* Actually, standard row is fine if I use negative margins correctly. */
+  flex-direction: row;
+}
+
+.forum-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid white;
+  margin-left: -15px;
+  object-fit: cover;
+  background-color: #ddd;
+  position: relative;
+  z-index: 1;
+}
+
+.forum-avatar:first-child {
+  margin-left: 0;
+  z-index: 0;
+}
+
+.forum-avatar:nth-child(2) { z-index: 1; }
+.forum-avatar:nth-child(3) { z-index: 2; }
+.forum-avatar:nth-child(4) { z-index: 3; }
+
+.forum-avatar-count {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
   background: #0f4c81;
   color: white;
-  width: 45px;
-  height: 45px;
-  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 14px;
+  font-weight: bold;
+  border: 2px solid white;
+  margin-left: -15px;
+  position: relative;
+  z-index: 10;
 }
 
 /* DESTAQUE */
@@ -183,4 +218,46 @@
 .modal-actions button:last-child {
   background: #1b75d1;
   color: white;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .forum-wrapper {
+    padding: 0 15px;
+    margin: 20px auto;
+  }
+
+  .forum-header h1 {
+    font-size: 28px;
+  }
+
+  .forum-header h2 {
+    font-size: 18px;
+  }
+
+  .forum-search-area {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px;
+  }
+
+  .forum-search-area input {
+    width: 100%;
+  }
+
+  .search-btn {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .create-btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .forum-grid {
+    grid-template-columns: 1fr;
+  }
 }

@@ -11,6 +11,16 @@ export const getRoomById = async (id:string) :Promise<Partial<RoomEntity> | ApiE
     return room;
 }
 
+export const getRooms =async()=>{
+    const rooms = await roomRepository.find({
+        relations: {
+            owner: true,
+            users: true
+        }
+    })
+    return rooms;
+}
+
 export const getUserFromRoomById =  async(roomId:string,userId:string):Promise<Partial<UserEntity> | ApiError> =>{
     const room = await roomRepository.findOne({
         where: { id: roomId },

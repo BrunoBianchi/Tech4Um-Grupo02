@@ -1,88 +1,42 @@
+import { useSocket } from "../hooks/socket-hook";
+import { useRoom } from "../hooks/room-hook";
+import LoginModal from "../shared/LoginModal";
 import "./forum.css";
-import { useState } from "react"; 
+import { useEffect, useState } from "react"; 
+import { useAuth } from "../hooks/auth-hook";
+import Avatar, { genConfig } from 'react-nice-avatar';
 
 export default function Forum() {
  const [searchTerm, setSearchTerm] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newForum, setNewForum] = useState({ nome: '', descricao: '' });
   const [user, setUser] = useState({ name: "João" }); // Simulação
-  const [forums, setForums] = useState([
-    {
-      destaque: true,
-      titulo: "product-development-stuff",
-      criador: "Lara Alves",
-      pessoas: "+48 pessoas",
-      descricao:
-        "O que temos de bom nessa sala, pessoal? Bora falar de programação, criação de coisas legais e projetos pessoais e desafios que queiram compartilhar.",
-    },
-    {
-      titulo: "gente-maneira-discutindo-tema-maneiro",
-      criador: "Um Nome",
-      pessoas: "+70 pessoas",
-    },
-    {
-      titulo: "Thinking about...",
-      criador: "Um Nome",
-      pessoas: "+70 pessoas",
-    },
-    {
-      titulo: "#segurança",
-      criador: "Um Nome",
-      pessoas: "+70 pessoas",
-    },
-    {
-      titulo: "Manda um nome maneiro para esse 4um",
-      criador: "Um Nome",
-      pessoas: "+10 pessoas",
-    },
-    {
-      titulo: "gamegamegame!",
-      criador: "Um Nome",
-      pessoas: "+70 pessoas",
-    },
-    {
-      titulo: "E as férias?...",
-      criador: "Um Nome",
-      pessoas: "+70 pessoas",
-    },
-    {
-      destaque: true,
-      titulo: "Designers_na_firma",
-      criador: "Lucas Gomes",
-      pessoas: "+65 pessoas",
-      descricao:
-        "O que temos de bom nessa sala, pessoal? Bora falar de programação, criação de coisas legais e projetos pessoais e desafios que queiram compartilhar.",
-    },
-    {
-      titulo: "Referências e Boas práticas",
-      criador: "Um Nome",
-      pessoas: "+70 pessoas",
-    },
-    {
-      titulo: "Systemmmmm",
-      criador: "Um Nome",
-      pessoas: "+70 pessoas",
-    },
-    {
-      titulo: "Tem_muita_coisa_...",
-      criador: "Um Nome",
-      pessoas: "+70 pessoas",
-    },
-  ]);
+  const {rooms,join,getRooms} = useRoom()
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const {signed} = useAuth()
+  const {socket,isConnected,connect} = useSocket()
+  const [forums, setForums] = useState(rooms);
 
-// Filtrar forums baseado na busca
-  const filteredForums = forums.filter(f => 
-    f.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (f.descricao && f.descricao.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  useEffect( ()=>{
 
-    // Função para criar novo fórum
+    getRooms()
+  },[])
+
+  useEffect(() => {
+     }, [rooms])
+
+  const filteredForums = rooms ? rooms.filter(f => 
+    f.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (f.description && f.description.toLowerCase().includes(searchTerm.toLowerCase()))
+  ) : [];
+
     const handleCreateForum = () => {
     if (!newForum.nome.trim()) {
       alert("O nome do fórum é obrigatório!");
       return;
     }
-
+    // TODO: Implement create call from context
+    /*
     const novoForum = {
       titulo: newForum.nome,
       criador: user ? user.name : "Usuário", //nome do usuário logado
@@ -91,6 +45,7 @@ export default function Forum() {
     };
 
     setForums([novoForum, ...forums]); // Adiciona no início
+    */
     setNewForum({ nome: '', descricao: '' });
     setShowCreateModal(false);
     alert("Fórum criado com sucesso!");
@@ -98,9 +53,12 @@ export default function Forum() {
 
 
   return (
+    
+    
     <div className="forum-wrapper">
+        <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} />
       <div className="forum-header">
-        <h1>Opa!</h1>
+        <h1 onClick={() => isConnected ? join('84e597c7-9002-4ca5-aec1-c2ff770e7638', socket.id) : console.log("desconectado")}>Opa!</h1>
         <h2>Sobre o que gostaria de falar hoje?</h2>
 
         <div className="forum-search-area">
@@ -124,6 +82,13 @@ export default function Forum() {
       <div className="forum-grid">
        {filteredForums.map((f, index) => (
           <div
+            onClick={() => {
+              if (socket?.id) {
+                join(f.id, socket.id);
+              } else {
+                console.warn("Socket not connected");
+              }
+            }}
             key={index}
             className={`forum-card ${f.destaque ? "destaque" : ""}`}
           >
@@ -131,18 +96,34 @@ export default function Forum() {
               <span className="destaque-text">Tópico em destaque!</span>
             )}
 
-            <h3>{f.titulo}</h3>
+            <h3>{f.name}</h3>
             <p className="forum-subinfo">
-              {f.criador} {f.pessoas}
+              {f.owner?.name} • {f.users?.length || 0} pessoas
             </p>
 
-            {f.descricao && <p className="forum-desc">{f.descricao}</p>}
+            {f.description && <p className="forum-desc">{f.description}</p>}
 
             <p className="forum-creator">
-                Criado por: <strong>{f.criador}</strong>
+                Criado por: <strong>{f.owner?.name}</strong>
             </p>
 
-            <div className="forum-circle">+115</div>
+                        <div className="forum-avatars-stack">
+              {f.users?.slice(0, 3).map((u, i) => (
+                <Avatar
+                  key={i}
+                  className="forum-avatar"
+                  {...genConfig(u.name)}
+                />
+              ))}
+              {(f.users?.length || 0) > 3 && (
+                <div className="forum-avatar-count">
+                  +{(f.users?.length || 0) - 3}
+                </div>
+              )}
+              {(!f.users || f.users.length === 0) && (
+                 <div className="forum-avatar-count">0</div>
+              )}
+            </div>
           </div>
         ))}
       </div>
