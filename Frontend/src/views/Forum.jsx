@@ -2,145 +2,228 @@ import { useSocket } from "../hooks/socket-hook";
 import { useRoom } from "../hooks/room-hook";
 import LoginModal from "../shared/LoginModal";
 import "./forum.css";
-import { useEffect, useState } from "react"; 
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useAuth } from "../hooks/auth-hook";
 import Avatar, { genConfig } from 'react-nice-avatar';
+import { useNavigate } from 'react-router-dom';
 
 export default function Forum() {
- const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [newForum, setNewForum] = useState({ nome: '', descricao: '' });
-  const [user, setUser] = useState({ name: "João" }); // Simulação
-  const {rooms,join,getRooms} = useRoom()
+  const [newForum, setNewForum] = useState({ nome: '', descricao: '', tags: '' });
+
+  const { rooms, join, getRooms, create } = useRoom()
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const {signed} = useAuth()
-  const {socket,isConnected,connect} = useSocket()
-  const [forums, setForums] = useState(rooms);
+  const { signed, user } = useAuth()
+  const { socket, isConnected, connect } = useSocket()
+  const navigate = useNavigate();
 
-  useEffect( ()=>{
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [selectedTag, setSelectedTag] = useState(null);
+  const observer = useRef();
 
-    getRooms()
-  },[])
+  const loadMore = useCallback(async () => {
+    if (isLoading) return;
+    setIsLoading(true);
+    const currentLength = rooms ? rooms.length : 0;
+    try {
+      const count = await getRooms(currentLength, 6, selectedTag);
+      if (count < 6) setHasMore(false);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [rooms, getRooms, isLoading, selectedTag]);
+
+  const lastForumElementRef = useCallback(node => {
+    if (isLoading) return;
+    if (observer.current) observer.current.disconnect();
+    observer.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasMore && rooms && rooms.length > 0) {
+        loadMore();
+      }
+    });
+    if (node) observer.current.observe(node);
+  }, [isLoading, hasMore, loadMore, rooms]);
 
   useEffect(() => {
-     }, [rooms])
+    setHasMore(true);
+    getRooms(0, 6, selectedTag).then(count => {
+      if (count < 6) setHasMore(false);
+    });
+  }, [selectedTag]);
 
-  const filteredForums = rooms ? rooms.filter(f => 
+  useEffect(() => {
+  }, [rooms]);
+
+  const filteredForums = rooms ? rooms.filter(f =>
     f.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (f.description && f.description.toLowerCase().includes(searchTerm.toLowerCase()))
   ) : [];
 
-    const handleCreateForum = () => {
+  const handleCreateForum = async () => {
     if (!newForum.nome.trim()) {
       alert("O nome do fórum é obrigatório!");
       return;
     }
-    // TODO: Implement create call from context
-    /*
-    const novoForum = {
-      titulo: newForum.nome,
-      criador: user ? user.name : "Usuário", //nome do usuário logado
-      pessoas: "+1 pessoa", // Começa com 1 participante
-      descricao: newForum.descricao
-    };
 
-    setForums([novoForum, ...forums]); // Adiciona no início
-    */
-    setNewForum({ nome: '', descricao: '' });
-    setShowCreateModal(false);
-    alert("Fórum criado com sucesso!");
+    try {
+      const tagsArray = newForum.tags.split(',').map(tag => tag.trim()).filter(tag => tag !== '');
+      const newRoom = await create(newForum.nome, newForum.descricao, tagsArray);
+      setShowCreateModal(false);
+      setNewForum({ nome: '', descricao: '', tags: '' });
+
+      if (newRoom && newRoom.id) {
+        if (socket?.id) {
+          join(newRoom.id, socket.id);
+        }
+        navigate(`/room/${newRoom.id}`);
+      }
+    } catch (error) {
+      console.error("Erro ao criar sala:", error);
+      alert("Erro ao criar sala. Tente novamente.");
+    }
   };
 
+  const handleTagClick = (tag, e) => {
+    e.stopPropagation();
+    if (selectedTag === tag) {
+      setSelectedTag(null);
+    } else {
+      setSelectedTag(tag);
+    }
+  };
 
   return (
-    
-    
     <div className="forum-wrapper">
-        <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} />
+      <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} />
       <div className="forum-header">
         <h1 onClick={() => isConnected ? join('84e597c7-9002-4ca5-aec1-c2ff770e7638', socket.id) : console.log("desconectado")}>Opa!</h1>
         <h2>Sobre o que gostaria de falar hoje?</h2>
 
         <div className="forum-search-area">
-          <input
-            type="text"
-            placeholder="Em busca de uma sala? Encontre-a aqui"
+          <div className="search-box">
+            <input
+              type="text"
+              placeholder="Busque por nome "
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <button className="search-btn">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M11 19C15.4183 19 19 15.4183 19 11C19 6.58172 15.4183 3 11 3C6.58172 3 3 6.58172 3 11C3 15.4183 6.58172 19 11 19Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M21 21L16.65 16.65" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+          </div>
 
-            value={searchTerm} 
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          <button className="search-btn">→</button>
-          <button 
+          <button
             className="create-btn"
             onClick={() => user ? setShowCreateModal(true) : alert('Faça login para criar um fórum')}
           >
-            Ou crie seu próprio 4um
-            </button>
+            <span>+</span> Criar novo 4um
+          </button>
         </div>
+
+        {selectedTag && (
+          <div className="filter-reminder">
+            <span>Filtrando por: <strong>#{selectedTag}</strong></span>
+            <button onClick={() => setSelectedTag(null)} className="clear-filter-btn">✕</button>
+          </div>
+        )}
       </div>
 
       <div className="forum-grid">
-       {filteredForums.map((f, index) => (
-          <div
-            onClick={() => {
-              if (socket?.id) {
-                join(f.id, socket.id);
-              } else {
-                console.warn("Socket not connected");
-              }
-            }}
-            key={index}
-            className={`forum-card ${f.destaque ? "destaque" : ""}`}
-          >
-            {f.destaque && (
-              <span className="destaque-text">Tópico em destaque!</span>
-            )}
-
-            <h3>{f.name}</h3>
-            <p className="forum-subinfo">
-              {f.owner?.name} • {f.users?.length || 0} pessoas
-            </p>
-
-            {f.description && <p className="forum-desc">{f.description}</p>}
-
-            <p className="forum-creator">
-                Criado por: <strong>{f.owner?.name}</strong>
-            </p>
-
-                        <div className="forum-avatars-stack">
-              {f.users?.slice(0, 3).map((u, i) => (
-                <Avatar
-                  key={i}
-                  className="forum-avatar"
-                  {...genConfig(u.name)}
-                />
-              ))}
-              {(f.users?.length || 0) > 3 && (
-                <div className="forum-avatar-count">
-                  +{(f.users?.length || 0) - 3}
+        {filteredForums.map((f, index) => {
+          const isFeatured = index === 0;
+          return (
+            <div
+              ref={filteredForums.length === index + 1 ? lastForumElementRef : null}
+              onClick={() => {
+                if (socket?.id) {
+                  join(f.id, socket.id);
+                  navigate(`/room/${f.id}`);
+                } else {
+                  console.warn("Socket not connected");
+                }
+              }}
+              key={index}
+              className={`forum-card ${isFeatured ? "featured" : ""}`}
+            >
+              {isFeatured && (
+                <div className="destaque-header">
+                  <span className="destaque-text">Tópico em destaque</span>
+                  <img src="https://em-content.zobj.net/source/noto-emoji-animations/344/fire_1f525.gif" alt="Fire" />
                 </div>
               )}
-              {(!f.users || f.users.length === 0) && (
-                 <div className="forum-avatar-count">0</div>
+
+              <h3>{f.name}</h3>
+              <p className="forum-subinfo">
+                {f.owner?.name} • {f.users?.length || 0} pessoas
+              </p>
+
+              {f.description && <p className="forum-desc">{f.description}</p>}
+
+              <p className="forum-creator">
+                Criado por: <strong>{f.owner?.name}</strong>
+              </p>
+
+              {f.tags && f.tags.length > 0 && (
+                <div className="forum-tags">
+                  {f.tags.map((t, i) => (
+                    <span
+                      key={i}
+                      className={`forum-tag ${selectedTag === t ? 'active' : ''}`}
+                      onClick={(e) => handleTagClick(t, e)}
+                    >
+                      #{t}
+                    </span>
+                  ))}
+                </div>
               )}
+
+              <div className="forum-avatars-stack">
+                {f.users?.slice(0, 3).map((u, i) => (
+                  <Avatar
+                    key={i}
+                    className="forum-avatar"
+                    {...genConfig(u.name)}
+                  />
+                ))}
+                {(f.users?.length || 0) > 3 && (
+                  <div className="forum-avatar-count">
+                    +{(f.users?.length || 0) - 3}
+                  </div>
+                )}
+                {(!f.users || f.users.length === 0) && (
+                  <div className="forum-avatar-count">0</div>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
-    { /* MODAL DE CRIAR FÓRUM */}
+      { /* MODAL DE CRIAR FÓRUM */}
       {showCreateModal && (
         <div className="modal-overlay">
           <div className="modal">
             <h3>Criar Novo Fórum</h3>
-            <input 
+            <input
               placeholder="Nome do fórum"
               value={newForum.nome}
-              onChange={(e) => setNewForum({...newForum, nome: e.target.value})}
+              onChange={(e) => setNewForum({ ...newForum, nome: e.target.value })}
             />
-            <textarea 
+            <input
+              placeholder="Tags (separadas por vírgula)"
+              value={newForum.tags}
+              onChange={(e) => setNewForum({ ...newForum, tags: e.target.value })}
+            />
+            <textarea
               placeholder="Descrição (opcional)"
               value={newForum.descricao}
-              onChange={(e) => setNewForum({...newForum, descricao: e.target.value})}
+              onChange={(e) => setNewForum({ ...newForum, descricao: e.target.value })}
               rows="4"
             />
             <div className="modal-actions">

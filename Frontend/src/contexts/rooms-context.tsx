@@ -2,8 +2,8 @@ import { createContext, useState } from "react";
 import { api } from "../services/axios";
 import { useSocket } from "../hooks/socket-hook";
 interface RoomContextData {
-  join(room: string,socketId:string): Promise<void>;
-  getRooms(): Promise<void>;
+  join(room: string, socketId: string): Promise<void>;
+  getRooms(start?: number, end?: number, tag?: string): Promise<number>;
   create(name: string, description?: string, tags?: string[]): Promise<void>;
   room: object | null;
   rooms: object[] | null;
@@ -15,12 +15,12 @@ export const RoomProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [room, setRoom] = useState(null);
   const [rooms, setRooms] = useState(null);
-  const {socket} = useSocket()
-  
-  async function join(room: string,socketId:string) {
+  const { socket } = useSocket()
+
+  async function join(room: string, socketId: string) {
     const storagedToken = localStorage.getItem("@App:token");
     try {
-      const response = await api.post(`/room/join/${room}`, 
+      const response = await api.post(`/room/join/${room}`,
         { socketId },
         {
           headers: {
@@ -35,32 +35,54 @@ export const RoomProvider: React.FC<{ children: React.ReactNode }> = ({
   }
   async function create(name: string, description?: string, tags?: string[]) {
     const storagedToken = localStorage.getItem("@App:token");
+    const storagedUser = localStorage.getItem("@App:user");
+
+    if (!storagedUser) throw new Error("User not found");
+    const user = JSON.parse(storagedUser);
+
     try {
-      const response = await api.post(`/room`, 
-        { name, description, tags },
+      const response = await api.post(`/room`,
+        { name, description, tags, owner: user.id },
         {
           headers: {
             authorization: `Bearer ${storagedToken}`,
           },
         }
       );
+      // Refresh rooms list after creation
+      await getRooms(0, 6);
       setRoom(response.data.room);
+      return response.data.room;
     } catch (err) {
       throw err;
     }
   }
-  async function getRooms() {
-     const storagedToken = localStorage.getItem("@App:token");
-     try {
+  async function getRooms(start: number = 0, end: number = 6, tag?: string) {
+    const storagedToken = localStorage.getItem("@App:token");
+    try {
       const response = await api.get(`/room/rooms`, {
+        params: { start, end, tag },
         headers: {
           authorization: `Bearer ${storagedToken}`,
         },
       });
-      setRooms(response.data.rooms);
+
+      if (start === 0) {
+        setRooms(response.data.rooms);
+      } else {
+        setRooms((prev: any) => {
+          if (!prev) return response.data.rooms;
+          // Avoid duplicates if any
+          const newRooms = response.data.rooms.filter((newRoom: any) =>
+            !prev.some((existingRoom: any) => existingRoom.id === newRoom.id)
+          );
+          return [...prev, ...newRooms];
+        });
+      }
+      return response.data.rooms.length;
     } catch (err) {
       throw err;
-    }   
+    }
   }
   return (
     <>

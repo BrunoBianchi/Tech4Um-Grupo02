@@ -1,0 +1,47 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: tech4um-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ""
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build: ./Backend
+    container_name: tech4um-backend
+    ports:
+      - "3000:3000"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: ""
+      JWT_SECRET: 4c2213c53eff423cc6365b196902eb9693e59132cf095088a89b4c577d9ba6599f553eea3dea5ce40e82aef200479a7d611cdd973a804504e9589ef5fc40b2758edc683f2899b2ee0263acbad1221aba82a475963c4f71930416a7a51e85859f2a96601a
+      EXPRESS_PORT: 3000
+    depends_on:
+      - postgres
+    volumes:
+      - ./Backend:/app   
+      - /app/node_modules 
+
+  frontend:
+    build: ./Frontend
+    container_name: tech4um-frontend
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_API_URL: http://localhost:3000/api
+    depends_on:
+      - backend
+    volumes:
+      - ./Frontend:/app   # hot reload funcionando
+      - /app/node_modules # evita apagar node_modules do container
+
+volumes:
+  postgres_data:

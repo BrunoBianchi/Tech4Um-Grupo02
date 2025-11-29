@@ -8,9 +8,9 @@ dotenv.config({
 export const decryptJWT = async (token:string):Promise<Partial<UserEntity>| Boolean> => {
     const secret = new TextEncoder().encode(process.env.JWT_SECRET);
     try {
-        return await jose.jwtVerify(token, secret) as Partial<UserEntity>;
+        const { payload } = await jose.jwtVerify(token, secret);
+        return payload as Partial<UserEntity>;
     }catch(err) {
-        return false
+        return false;
     }
-  
 }

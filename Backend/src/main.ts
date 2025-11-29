@@ -1,4 +1,4 @@
-import "reflect-metadata";
+import "reflect-metadata"; // Trigger restart
 import { AppDataSource } from "./config/database/datasource.ts";
 import {serverExpress as app} from "./config/express/express-server.ts";
 import { initializeSocketServer } from "./config/socketio/socketio-server.ts";

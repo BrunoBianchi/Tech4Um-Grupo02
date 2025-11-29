@@ -23,7 +23,6 @@ const Errors =  {
 }
 
 export const errorMiddleware = (err:ApiError,req:Request,res:Response,next:NextFunction)=> {
-    console.log(err)
     const error:{cause:APIErrors,message:string,code:number} =  Errors[err.name as keyof typeof Errors](err as ApiError | ZodError | any)
     if(err) return res.status(error.code).json({cause:error.cause,message:error.message})
     return next();

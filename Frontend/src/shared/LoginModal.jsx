@@ -3,11 +3,11 @@ import { useAuth } from '../hooks/auth-hook';
 import { api } from '../services/axios';
 
 export default function LoginModal({ isOpen, onClose }) {
-  const [mode, setMode] = useState('login'); 
+  const [mode, setMode] = useState('login');
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const { login } = useAuth();
+  const { login, register } = useAuth();
 
   if (!isOpen) return null;
 
@@ -22,18 +22,13 @@ export default function LoginModal({ isOpen, onClose }) {
 
     try {
       if (mode === 'login') {
-        await login(formData.email, formData.password).then((u)=>{
-            console.log(u)
+        await login(formData.email, formData.password).then((u) => {
+          console.log(u)
         })
-        
+
       } else if (mode === 'register') {
-        await api.post('/auth/register', {
-          name: formData.name,
-          email: formData.email,
-          password: formData.password,
-        });
-        setMode('login');
-        alert('Conta criada com sucesso! Faça login.');
+        await register(formData.name, formData.email, formData.password);
+        onClose(); // Close modal on success
       } else if (mode === 'forgot') {
         // Placeholder for forgot password
         alert('Funcionalidade de recuperação de senha enviada para o e-mail (simulação).');
@@ -47,24 +42,24 @@ export default function LoginModal({ isOpen, onClose }) {
   };
 
   return (
-    <div 
+    <div
       className="fixed inset-0 flex items-center justify-center z-50"
       style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}
     >
       <div className="bg-white rounded-3xl p-10 w-[500px] relative shadow-2xl">
-        <button 
-          onClick={onClose} 
+        <button
+          onClick={onClose}
           className="absolute top-6 right-6 text-gray-400 hover:text-gray-600 font-bold text-xl"
         >
           ✕
         </button>
-        
+
         <h2 className="text-3xl font-bold text-[#2d80d2] mb-2 text-center">
           {mode === 'login' && 'Que bom ter você aqui!'}
           {mode === 'register' && 'Crie sua conta'}
           {mode === 'forgot' && 'Recuperar senha'}
         </h2>
-        
+
         <p className="text-gray-500 mb-8 text-center text-sm">
           {mode === 'login' && 'Para participar de um 4um é necessário fazer login.'}
           {mode === 'register' && 'Preencha os dados abaixo para começar.'}
@@ -123,8 +118,8 @@ export default function LoginModal({ isOpen, onClose }) {
             className="bg-[#1e70b9] text-white font-bold py-3 rounded-lg mt-2 hover:bg-[#165a96] transition-colors disabled:opacity-70"
           >
             {loading ? 'Carregando...' : (
-              mode === 'login' ? 'Entrar' : 
-              mode === 'register' ? 'Cadastrar' : 'Enviar'
+              mode === 'login' ? 'Entrar' :
+                mode === 'register' ? 'Cadastrar' : 'Enviar'
             )}
           </button>
         </form>
@@ -143,7 +138,7 @@ export default function LoginModal({ isOpen, onClose }) {
               </p>
             </>
           )}
-          
+
           {(mode === 'register' || mode === 'forgot') && (
             <button onClick={() => setMode('login')} className="text-[#1e70b9] font-bold hover:underline">
               Voltar para o login
