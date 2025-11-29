@@ -11,10 +11,8 @@ const roomRepository = AppDataSource.getRepository(RoomEntity)
 const userRepository = AppDataSource.getRepository(UserEntity)
 
 export const joinRoom = async (roomId:string,socketId:string) => {
-    // Try to get the local socket instance first (synchronous join)
     let socket: any = io.sockets.sockets.get(socketId);
 
-    // If not found locally, try fetching (for multi-node setups, though join might be async/delayed)
     if (!socket) {
         const sockets = await io.sockets.fetchSockets();
         socket = sockets.find(s => s.id == socketId);
@@ -54,7 +52,6 @@ export const joinRoom = async (roomId:string,socketId:string) => {
         room.users.push(user);
         await roomRepository.save(room);
 
-        // --- Welcome Message Logic ---
         const welcomeTemplates = [
             "{name} acabou de aterrissar.",
             "Eba, você conseguiu, {name}!",
@@ -69,7 +66,6 @@ export const joinRoom = async (roomId:string,socketId:string) => {
         const randomTemplate = welcomeTemplates[Math.floor(Math.random() * welcomeTemplates.length)];
         const welcomeText = randomTemplate?.replace("{name}", user.name);
 
-        // Create and save the welcome message
         const messageRepo = AppDataSource.getRepository(MessageEntity);
         const welcomeMessage = new MessageEntity();
         welcomeMessage.content = welcomeText!;
@@ -79,7 +75,6 @@ export const joinRoom = async (roomId:string,socketId:string) => {
         try {
             const savedMessage = await messageRepo.save(welcomeMessage);
 
-            // Broadcast the message immediately
             io.to(`/room/${roomId}`).emit('receive_message', {
                 id: savedMessage.id,
                 text: savedMessage.content,
@@ -90,13 +85,11 @@ export const joinRoom = async (roomId:string,socketId:string) => {
         } catch (err) {
             console.error(`[Join] Failed to save welcome message:`, err);
         }
-        // -----------------------------
     }
 
     socket.join(`/room/${roomId}`);
-    socket.join(`user:${userId}`); // Join user-specific room for private messages
+    socket.join(`user:${userId}`); 
     
-    // Small delay to ensure socket join propagates before broadcasting
     setTimeout(async () => {
         await broadcastParticipants(io, roomId);
     }, 100);

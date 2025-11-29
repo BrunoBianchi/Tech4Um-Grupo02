@@ -5,13 +5,29 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useSocket } from '../hooks/socket-hook';
 import { useAuth } from '../hooks/auth-hook';
 import { useRoom } from '../hooks/room-hook';
-import EmojiPicker from 'emoji-picker-react';
+import { getCookie } from '../utils/cookie';
 import './chat-room.css';
+
+// Mock GIF Data with keywords for local search
+const GIF_LIBRARY = [
+  { url: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExbXp1Z2J6a3Z6a3Z6a3Z6a3Z6a3Z6a3Z6a3Z6a3Z6a3Z6/3o7TKSjRrfIPjeiVyM/giphy.gif", keywords: ["happy", "dance", "excited", "yay"] },
+  { url: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExbXp1Z2J6a3Z6a3Z6a3Z6a3Z6a3Z6a3Z6a3Z6a3Z6a3Z6/l0HlHFRbmaZtBRhXG/giphy.gif", keywords: ["hello", "hi", "wave", "welcome"] },
+  { url: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExbXp1Z2J6a3Z6a3Z6a3Z6a3Z6a3Z6a3Z6a3Z6a3Z6a3Z6/xT0xezQGU5xQOuTxWQ/giphy.gif", keywords: ["confused", "what", "huh", "question"] },
+  { url: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExbXp1Z2J6a3Z6a3Z6a3Z6a3Z6a3Z6a3Z6a3Z6a3Z6a3Z6/3o6Zt481isNVuQI1l6/giphy.gif", keywords: ["cat", "funny", "animal", "cute"] },
+  { url: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExbXp1Z2J6a3Z6a3Z6a3Z6a3Z6a3Z6a3Z6a3Z6a3Z6a3Z6/l0MYt5qVJZHrK86Ed/giphy.gif", keywords: ["dog", "funny", "animal", "cute"] },
+  { url: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExbXp1Z2J6a3Z6a3Z6a3Z6a3Z6a3Z6a3Z6a3Z6a3Z6a3Z6/3o7TKDkDbfd7fW7J5u/giphy.gif", keywords: ["laugh", "lol", "haha", "funny"] },
+  { url: "https://media.giphy.com/media/26tPplGWjN0xLyq5i/giphy.gif", keywords: ["yes", "agree", "nod", "ok"] },
+  { url: "https://media.giphy.com/media/3o7btUg31OCi0NXdkY/giphy.gif", keywords: ["no", "nope", "disagree", "stop"] },
+  { url: "https://media.giphy.com/media/l0HlCqV35hdEg2PN6/giphy.gif", keywords: ["cry", "sad", "tears", "upset"] },
+  { url: "https://media.giphy.com/media/3o6UB3VhArvomJHtdK/giphy.gif", keywords: ["angry", "mad", "rage", "furious"] },
+  { url: "https://media.giphy.com/media/l2JIdnF6aJcNqnUfC/giphy.gif", keywords: ["party", "celebrate", "fun", "cool"] },
+  { url: "https://media.giphy.com/media/3oEjHWXddcIYf6st4k/giphy.gif", keywords: ["thumbs up", "like", "good", "approve"] },
+];
 
 export default function ChatRoom() {
   const navigate = useNavigate();
   const { roomId } = useParams();
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const { join } = useRoom();
   const { socket, isConnected, connect } = useSocket();
 
@@ -20,6 +36,7 @@ export default function ChatRoom() {
   const [participants, setParticipants] = useState([]);
   const [messages, setMessages] = useState([]);
   const [typingUsers, setTypingUsers] = useState(new Set());
+  const [showParticipants, setShowParticipants] = useState(true);
 
   // Mention State
   const [mentionSearch, setMentionSearch] = useState(null);
@@ -36,22 +53,6 @@ export default function ChatRoom() {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showGifPicker, setShowGifPicker] = useState(false);
   const [gifSearch, setGifSearch] = useState('');
-
-  // Mock GIF Data with keywords for local search
-  const GIF_LIBRARY = [
-    { url: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExbXp1Z2J6a3Z6a3Z6a3Z6a3Z6a3Z6a3Z6a3Z6a3Z6a3Z6/3o7TKSjRrfIPjeiVyM/giphy.gif", keywords: ["happy", "dance", "excited", "yay"] },
-    { url: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExbXp1Z2J6a3Z6a3Z6a3Z6a3Z6a3Z6a3Z6a3Z6a3Z6a3Z6/l0HlHFRbmaZtBRhXG/giphy.gif", keywords: ["hello", "hi", "wave", "welcome"] },
-    { url: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExbXp1Z2J6a3Z6a3Z6a3Z6a3Z6a3Z6a3Z6a3Z6a3Z6a3Z6/xT0xezQGU5xQOuTxWQ/giphy.gif", keywords: ["confused", "what", "huh", "question"] },
-    { url: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExbXp1Z2J6a3Z6a3Z6a3Z6a3Z6a3Z6a3Z6a3Z6a3Z6a3Z6/3o6Zt481isNVuQI1l6/giphy.gif", keywords: ["cat", "funny", "animal", "cute"] },
-    { url: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExbXp1Z2J6a3Z6a3Z6a3Z6a3Z6a3Z6a3Z6a3Z6a3Z6a3Z6/l0MYt5qVJZHrK86Ed/giphy.gif", keywords: ["dog", "funny", "animal", "cute"] },
-    { url: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExbXp1Z2J6a3Z6a3Z6a3Z6a3Z6a3Z6a3Z6a3Z6a3Z6a3Z6/3o7TKDkDbfd7fW7J5u/giphy.gif", keywords: ["laugh", "lol", "haha", "funny"] },
-    { url: "https://media.giphy.com/media/26tPplGWjN0xLyq5i/giphy.gif", keywords: ["yes", "agree", "nod", "ok"] },
-    { url: "https://media.giphy.com/media/3o7btUg31OCi0NXdkY/giphy.gif", keywords: ["no", "nope", "disagree", "stop"] },
-    { url: "https://media.giphy.com/media/l0HlCqV35hdEg2PN6/giphy.gif", keywords: ["cry", "sad", "tears", "upset"] },
-    { url: "https://media.giphy.com/media/3o6UB3VhArvomJHtdK/giphy.gif", keywords: ["angry", "mad", "rage", "furious"] },
-    { url: "https://media.giphy.com/media/l2JIdnF6aJcNqnUfC/giphy.gif", keywords: ["party", "celebrate", "fun", "cool"] },
-    { url: "https://media.giphy.com/media/3oEjHWXddcIYf6st4k/giphy.gif", keywords: ["thumbs up", "like", "good", "approve"] },
-  ];
 
   const [filteredGifs, setFilteredGifs] = useState(GIF_LIBRARY);
 
@@ -94,6 +95,8 @@ export default function ChatRoom() {
   }, [pickerRef]);
 
   useEffect(() => {
+    if (loading) return; // Wait for auth to load
+
     if (socket && isConnected && roomId) {
       const initChat = async () => {
         try {
@@ -165,11 +168,10 @@ export default function ChatRoom() {
         socket.off('update_participants');
         socket.off('user_typing');
       };
-    } else if (!socket && !isConnected) {
-      const token = localStorage.getItem('@App:token');
-      if (token) connect(token);
+    } else if (!socket && !isConnected && !loading) {
+      // Socket hook handles connection based on auth state
     }
-  }, [socket, isConnected, roomId]);
+  }, [socket, isConnected, roomId, loading]);
 
   // Fetch Similar Rooms
   useEffect(() => {
@@ -181,6 +183,10 @@ export default function ChatRoom() {
         .catch(err => console.error("Failed to fetch similar rooms:", err));
     }
   }, [roomId]);
+
+  if (loading) {
+    return <div className="flex items-center justify-center h-screen">Carregando...</div>;
+  }
 
   const handleSendMessage = (msgText = message) => {
     if (msgText.trim() && socket) {
@@ -341,21 +347,38 @@ export default function ChatRoom() {
         <div className={`chat-sidebar-left ${activeTab === 'participants' ? 'mobile-visible' : ''}`}>
           <div className="sidebar-header">
             <h3>Participantes</h3>
-            <button className="search-icon-btn">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <button className="search-icon-btn" onClick={() => setShowParticipants(!showParticipants)} title={showParticipants ? "Ocultar participantes" : "Mostrar participantes"}>
+              {showParticipants ? (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+              ) : (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              )}
             </button>
           </div>
-          <div className="participants-list">
-            {participants.map((p) => (
-              <div key={p.id} className={`participant-item ${p.active ? 'online' : 'offline'}`} onClick={() => handleParticipantClick(p)}>
-                <div className="avatar-wrapper">
-                  <Avatar className="participant-avatar" {...genConfig(p.name)} />
-                  {p.active && <div className="online-indicator"></div>}
+          {showParticipants && (
+            <div className="participants-list">
+              {participants.map((p) => (
+                <div key={p.id} className={`participant-item ${p.active ? 'online' : 'offline'}`} onClick={() => handleParticipantClick(p)}>
+                  <div className="avatar-wrapper">
+                    <Avatar className="participant-avatar" {...genConfig(p.name)} />
+                    {p.active && <div className="online-indicator"></div>}
+                  </div>
+                  <span className="participant-name">{p.name} {String(p.id) === String(user?.id) && '(Você)'}</span>
+
+                  {String(p.id) !== String(user?.id) && (
+                    <div className="participant-hover-actions">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="pm-icon">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                      </svg>
+                      <div className="pm-tooltip">
+                        Enviar mensagem para {p.name.split(' ')[0]}
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <span className="participant-name">{p.name} {p.id === user?.id && '(Você)'}</span>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* MAIN CHAT AREA */}
@@ -367,7 +390,7 @@ export default function ChatRoom() {
 
           <div className="messages-list">
             {messages.map((msg, index) => (
-              <div key={index} className={`message-item ${msg.userId === user?.id ? 'my-message' : ''} ${isUserMentioned(msg.text) ? 'mentioned' : ''} ${msg.isPrivate ? 'private-message' : ''}`}>
+              <div key={index} className={`message-item ${String(msg.userId) === String(user?.id) ? 'my-message' : ''} ${isUserMentioned(msg.text) ? 'mentioned' : ''} ${msg.isPrivate ? 'private-message' : ''}`}>
                 <Avatar className="message-avatar" {...msg.avatarConfig} />
                 <div className="message-content">
                   <div className="message-user">
@@ -375,7 +398,7 @@ export default function ChatRoom() {
                     <span className="message-time">
                       {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </span>
-                    {msg.isPrivate && <span className="private-tag">🔒 Privado {msg.userId === user?.id ? `para ${msg.destinationName}` : 'para você'}</span>}
+                    {msg.isPrivate && <span className="private-tag">🔒 Privado {String(msg.userId) === String(user?.id) ? `para ${msg.destinationName}` : 'para você'}</span>}
                   </div>
                   <div className="message-text">{renderMessageContent(msg.text)}</div>
                 </div>

@@ -7,6 +7,12 @@ import type { UserEntity } from "../models/UserEntity.ts";
 const router:Router = Router()
 
 
+import { authMiddleware } from "../middlewares/auth-middleware.ts";
+
+router.get("/me", authMiddleware, (req, res) => {
+    res.status(200).json({ status: 200, user: res.locals.user });
+});
+
 router.post("/login",async(req,res)=>{
         const {email,password} = z.object({
         email:z.email(),

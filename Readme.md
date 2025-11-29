@@ -76,6 +76,14 @@ Tech4Um-Grupo02/
 ---
 
 ## Engenharia de Software
+### Decisões de Arquitetura
+O Tech4Um foi desenvolvido com foco em modularidade e separação de responsabilidades, utilizando o padrão MSC (Model-Service-Controller) no backend. Essa abordagem facilita a manutenção, evolução e testabilidade do sistema, permitindo que diferentes partes do projeto sejam desenvolvidas e otimizadas de forma independente.
+
+### Validação em Camadas
+O sistema realiza validação dos dados em múltiplas camadas: no frontend, para evitar requisições inválidas; no backend, utilizando middlewares e schemas; e no banco de dados, por meio de constraints e tipos. Isso garante integridade e segurança das informações.
+
+### Segurança: JWT e Cookies
+A autenticação é realizada via JWT, garantindo sessões stateless e seguras. Tokens podem ser armazenados em cookies com flags de segurança (HttpOnly, Secure, SameSite), protegendo contra ataques XSS e CSRF.
 Engenharia de software é uma metodologia ao todo para um processo 
 de organização de requisitos até a entrega de um MVP. Será utilizado essa 
 metodologia com o intuito de criar um aplicativo focado em: *Manutenção*, 
@@ -100,6 +108,19 @@ Os requisitos funcionais descrevem os comportamentos e as ações específicas q
 * **RF06 - Mensagens:** O sistema deve permitir o envio e recebimento de mensagens públicas e privadas.
 * **RF07 - Participantes:** O sistema deve listar os participantes ativos no chat.
 * **RF08 - Visibilidade:** O sistema deve oferecer uma opção para ocultar ou exibir a lista de participantes.
+* **RF09 - Visibilidade:** O sistema deverá realizar o salvamento das mensagens enviadas em uma sala e renderizá-las após f5 ou para um novo usuário.
+
+**Opcionais**
+* **RF10 - Tags ✅:** O Sistema deverá permitir a adição de tags para as salas, bem como filtrá-las e também permitir recomendações de salas com tags semelhantes.
+* **RF011 - Pagination ✅:** O Sistema deverá realizar a paginação de salas automaticamente com o scroll (após a página encontrar a última row de cards (6) ).
+* **RF012 - Envio de emojis e gifs ✅:** O Sistema deverá permitir o envio de emojis e gifs diretamente na room.
+* **RF013 - Sistema de menção (@) ✅:** O Sistema permitirá usuário mencionar outros usuários utilizando @ + nome. Para o usuário mencionado, a mensagem ficará com um highlight.
+* **RF014 - Mensagem de boas-vindas ✅:** O Sistema deverá enviar mensagem no chat após um novo usuário entrar.
+* **RF015 - Sistema de status de conexão ✅:** O Sistema realizará uma verificação automática do usuário em salas e na navbar, permitindo identificar usuários online e offline, os usuários online ficarão com um círculo verde, enquanto os offline ficarão com um blur, tendo prioridade de ordem para os online.
+* **RF016 - Sistema de filtro ✅:** O Sistema deverá permitir ao usuário a filtragem de salas por *data*, *popularidade* e *dono*.
+* **RF017 - Contagem de usuários em cada room ✅:** O Sistema deverá permitir para cada card de uma sala a contagem de seus usuários.
+* **RF018 - Indicação de digitação ✅:** O Sistema deverá notificar demais usuários quando um usuário estiver digitando, se caso exista mais de um usuário digitando ao mesmo tempo irá mudar para *Alguns usuários estão digitando...*
+* **RF019 - Exibição horário de envio de mensagens ✅:** O Sistema deverá mostrar junto à mensagem enviada a data (em horas) de seu envio.
 
 ---
 
@@ -110,7 +131,8 @@ Os requisitos não funcionais definem os critérios de qualidade e as restriçõ
 **Segurança**
 * **RNF01 - Autenticação Robusta:** O controle de sessão deve utilizar o padrão **JWT (JSON Web Token)**, garantindo integridade e estatelessness.
 * **RNF02 - Proteção de Dados:** As senhas devem ser armazenadas no banco de dados utilizando **Hashing seguro** (ex: Bcrypt ou Argon2).
-* **RNF03 - Privacidade:** As mensagens privadas devem trafegar com **criptografia de ponta a ponta**.
+* **RNF03 - Handshake:** A conexão entre Socket IO e Express deverá ser feita atráves de um HandkShake utilizando token JWT.
+
 
 **Desempenho e Arquitetura**
 * **RNF04 - Tempo Real:** A comunicação do chat deve utilizar **WebSockets** para garantir baixa latência na entrega de mensagens.
@@ -118,6 +140,7 @@ Os requisitos não funcionais definem os critérios de qualidade e as restriçõ
 
 **Usabilidade (UX)**
 * **RNF06 - Interface Responsiva:** A interface gráfica deve ser intuitiva e adaptar-se automaticamente a diferentes tamanhos de tela (Desktop e Mobile).
+
 
 ---
 
@@ -129,17 +152,27 @@ Na engenharia de software, os diagramas são representações visuais utilizadas
 Um diagrama de sequência, em engenharia de software, é um diagrama UML que mostra como os objetos/atores de um sistema trocam mensagens ao longo do tempo para realizar um caso de uso específico, destacando a ordem em que essas interações acontecem.
 
 
+![Diagrama de Sequencia para login](https://i.imgur.com/dwM4A3L.png)
+<br>
+**Descrição:** Este diagrama mostra o fluxo de autenticação do usuário. O usuário envia suas credenciais pelo frontend, que repassa ao backend. O backend valida as credenciais no banco de dados, gera um token JWT em caso de sucesso e retorna ao frontend, que exibe o resultado ao usuário.
+
+![Diagrama de Sequencia conexão socket e express](https://i.imgur.com/n4dByaV.png)
+<br>
+**Descrição:** Este diagrama representa o processo de conexão do usuário ao chat em tempo real via Socket.IO. O frontend conecta ao backend enviando o token JWT, que é validado pelo Express. Após validação, a conexão é estabelecida e o usuário pode interagir no chat.
+
+
 #### 2.2 Estado
 
 Em engenharia de software, um diagrama de estados (ou diagrama de máquina de estados UML) mostra os possíveis estados de um objeto ao longo do seu ciclo de vida e as transições entre esses estados em resposta a eventos.
 
+
 ![Diagrama de estado](https://i.imgur.com/AKRirn2.jpeg)
+<br>
+**Descrição:** Este diagrama ilustra os possíveis estados de um usuário ou entidade dentro do sistema ao longo do seu ciclo de vida. Mostra como o objeto transita entre estados (ex: cadastrado, autenticado, em sala, desconectado) em resposta a eventos e ações, facilitando o entendimento do comportamento dinâmico do sistema.
 
 ---
 
 ## Tecnologias Utilizadas
-
-
 ### 1 Github
 
 A utilização do [**Github**](https://github.com/BrunoBianchi/Tech4Um-Grupo02) se deu principalmente no processo de versionamento do código, foi utilizando uma estrutura focada em features, ou seja a criação de uma nova branch aninhada com o [**JIRA**](#12-jira) para cada uma das features, possibilitando o rollback caso necessário.
@@ -158,14 +191,14 @@ O **Discord** foi utilizado como o principal meio de comunicação entre nosso g
 
 ### 4 Docker
 
+
 O **Docker** foi utilizado com o arquivo **compose** para a modelagem e execução facilitada em qualquer sistema operacional, sem a necessidade de conexões extras.
 
----
+![Imagem funcionamento do docker](https://i.imgur.com/rCGxWS1.png)
+<br>
+**Funcionamento do docker-compose:**
+O arquivo `docker-compose.yml` orquestra os serviços do projeto, permitindo subir o Backend, o Frontend e o Banco de dados em containers separados de forma automatizada. Cada serviço possui sua própria configuração de build, portas expostas e dependências, garantindo isolamento e facilidade de deploy. Basta executar `docker compose build --no-cache` + `docker compose up` para iniciar toda a aplicação, sem necessidade de instalar dependências manualmente ou configurar ambiente local. O compose também facilita o gerenciamento, atualização e escalabilidade dos serviços, tornando o processo de desenvolvimento e testes mais ágil e padronizado.
 
-
-### 2 Backend
-
-### 3 Frontend
 
 ---
 
@@ -190,5 +223,32 @@ aplicação, para características mais técnicas temos um Readme Dedicado ao
 
 
 ## Instruções de Execução
+---
+Para iniciar o aplicativo completo (Backend e Frontend) usando Docker Compose, siga os passos abaixo:
+
+1. Certifique-se de ter o Docker e o Docker Compose instalados em sua máquina.
+2. No diretório raiz do projeto, execute o comando abaixo para construir as imagens sem cache:
+    ```lua
+    docker compose build --no-cache
+    ```
+3. Após a build, inicie todos os serviços (backend, frontend e banco de dados) com:
+    ```lua
+    docker compose up
+    ```
+4. O frontend estará disponível em `http://localhost:5173`, o backend em `http://localhost:3000` e o postgreSQL em `http://localhost:5432` (ou conforme definido no docker-compose.yml).
+5. Para parar os serviços, pressione `Ctrl+C` no terminal ou execute:
+    ```lua
+    docker compose down
+    ```
 
 ---
+## Possíveis Melhorias / Funcionalidades Futuras
+- Implementação de cache para otimizar consultas.
+- Implementação de Redis para cache + processamento assíncrono de multiplos usuários enviando mensagem.
+- Testes end-to-end com Cypress.
+- Documentação da API com Swagger.
+- Teste unitários.
+---
+## Agradecimentos
+
+Agradecemos ao CEU, à todas empresas do evento, mentores e equipe pelo suporte e oportunidade de participar do desafio, que proporcionou grande aprendizado e evolução profissional.

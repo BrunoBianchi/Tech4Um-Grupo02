@@ -1,6 +1,7 @@
 import { useSocket } from "../hooks/socket-hook";
 import { useRoom } from "../hooks/room-hook";
 import LoginModal from "../shared/LoginModal";
+import Dropdown from "../shared/Dropdown";
 import "./forum.css";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useAuth } from "../hooks/auth-hook";
@@ -11,6 +12,11 @@ export default function Forum() {
   const [searchTerm, setSearchTerm] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newForum, setNewForum] = useState({ nome: '', descricao: '', tags: '' });
+
+  // Filter states
+  const [orderBy, setOrderBy] = useState('popularity');
+  const [orderDirection, setOrderDirection] = useState('DESC');
+  const [ownerFilter, setOwnerFilter] = useState('');
 
   const { rooms, join, getRooms, create } = useRoom()
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
@@ -28,14 +34,14 @@ export default function Forum() {
     setIsLoading(true);
     const currentLength = rooms ? rooms.length : 0;
     try {
-      const count = await getRooms(currentLength, 6, selectedTag);
+      const count = await getRooms(currentLength, 6, selectedTag, orderBy, orderDirection, ownerFilter);
       if (count < 6) setHasMore(false);
     } catch (error) {
       console.error(error);
     } finally {
       setIsLoading(false);
     }
-  }, [rooms, getRooms, isLoading, selectedTag]);
+  }, [rooms, getRooms, isLoading, selectedTag, orderBy, orderDirection, ownerFilter]);
 
   const lastForumElementRef = useCallback(node => {
     if (isLoading) return;
@@ -50,10 +56,10 @@ export default function Forum() {
 
   useEffect(() => {
     setHasMore(true);
-    getRooms(0, 6, selectedTag).then(count => {
+    getRooms(0, 6, selectedTag, orderBy, orderDirection, ownerFilter).then(count => {
       if (count < 6) setHasMore(false);
     });
-  }, [selectedTag]);
+  }, [selectedTag, orderBy, orderDirection, ownerFilter]);
 
   useEffect(() => {
   }, [rooms]);
@@ -127,6 +133,35 @@ export default function Forum() {
           </button>
         </div>
 
+        <div className="filters-area">
+          <Dropdown
+            options={[
+              { value: 'popularity', label: 'Popularidade' },
+              { value: 'date', label: 'Data' },
+              { value: 'owner', label: 'Dono' }
+            ]}
+            value={orderBy}
+            onChange={setOrderBy}
+          />
+
+          <Dropdown
+            options={[
+              { value: 'DESC', label: 'Decrescente' },
+              { value: 'ASC', label: 'Crescente' }
+            ]}
+            value={orderDirection}
+            onChange={setOrderDirection}
+          />
+
+          <input
+            type="text"
+            placeholder="Filtrar por ID do dono"
+            value={ownerFilter}
+            onChange={(e) => setOwnerFilter(e.target.value)}
+            className="filter-input"
+          />
+        </div>
+
         {selectedTag && (
           <div className="filter-reminder">
             <span>Filtrando por: <strong>#{selectedTag}</strong></span>
@@ -142,6 +177,10 @@ export default function Forum() {
             <div
               ref={filteredForums.length === index + 1 ? lastForumElementRef : null}
               onClick={() => {
+                if (!user) {
+                  setIsLoginModalOpen(true);
+                  return;
+                }
                 if (socket?.id) {
                   join(f.id, socket.id);
                   navigate(`/room/${f.id}`);

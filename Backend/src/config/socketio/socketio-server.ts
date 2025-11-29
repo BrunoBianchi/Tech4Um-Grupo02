@@ -25,9 +25,7 @@ io.on('connection',async (socket:any) => {
     }
     socket.data.userId = (user as UserEntity).id;
     handleSocketEvents(socket, io);
-    // Emitir participantes ao conectar (caso já esteja em uma sala)
     socket.on('join_room', async (roomId: string) => {
-        // Garante que o userId está sempre preenchido
         if (!socket.data.userId) {
             const token = socket.handshake.auth?.token || socket.handshake.headers?.token || (socket.handshake as any).token;
             if (token) {

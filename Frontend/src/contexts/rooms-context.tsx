@@ -1,15 +1,25 @@
 import { createContext, useState } from "react";
 import { api } from "../services/axios";
 import { useSocket } from "../hooks/socket-hook";
+import { getCookie } from "../utils/cookie";
+
 interface RoomContextData {
   join(room: string, socketId: string): Promise<void>;
-  getRooms(start?: number, end?: number, tag?: string): Promise<number>;
+  getRooms(
+    start?: number,
+    end?: number,
+    tag?: string,
+    orderBy?: 'date' | 'popularity' | 'owner',
+    orderDirection?: 'ASC' | 'DESC',
+    ownerId?: string
+  ): Promise<number>;
   create(name: string, description?: string, tags?: string[]): Promise<void>;
   room: object | null;
   rooms: object[] | null;
 }
 
 const RoomContext = createContext<RoomContextData>({} as RoomContextData);
+
 export const RoomProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
@@ -18,7 +28,7 @@ export const RoomProvider: React.FC<{ children: React.ReactNode }> = ({
   const { socket } = useSocket()
 
   async function join(room: string, socketId: string) {
-    const storagedToken = localStorage.getItem("@App:token");
+    const storagedToken = getCookie("@App:token");
     try {
       const response = await api.post(`/room/join/${room}`,
         { socketId },
@@ -33,9 +43,10 @@ export const RoomProvider: React.FC<{ children: React.ReactNode }> = ({
       throw err;
     }
   }
+
   async function create(name: string, description?: string, tags?: string[]) {
-    const storagedToken = localStorage.getItem("@App:token");
-    const storagedUser = localStorage.getItem("@App:user");
+    const storagedToken = getCookie("@App:token");
+    const storagedUser = getCookie("@App:user");
 
     if (!storagedUser) throw new Error("User not found");
     const user = JSON.parse(storagedUser);
@@ -57,11 +68,19 @@ export const RoomProvider: React.FC<{ children: React.ReactNode }> = ({
       throw err;
     }
   }
-  async function getRooms(start: number = 0, end: number = 6, tag?: string) {
-    const storagedToken = localStorage.getItem("@App:token");
+
+  async function getRooms(
+    start: number = 0,
+    end: number = 6,
+    tag?: string,
+    orderBy?: 'date' | 'popularity' | 'owner',
+    orderDirection?: 'ASC' | 'DESC',
+    ownerId?: string
+  ) {
+    const storagedToken = getCookie("@App:token");
     try {
       const response = await api.get(`/room/rooms`, {
-        params: { start, end, tag },
+        params: { start, end, tag, orderBy, orderDirection, ownerId },
         headers: {
           authorization: `Bearer ${storagedToken}`,
         },
@@ -84,6 +103,7 @@ export const RoomProvider: React.FC<{ children: React.ReactNode }> = ({
       throw err;
     }
   }
+
   return (
     <>
       <RoomContext.Provider

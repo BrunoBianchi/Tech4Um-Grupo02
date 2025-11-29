@@ -37,12 +37,15 @@ router.post("/join/:id",authMiddleware,async(req:Request,res:Response)=>{
 })
 
 router.get("/rooms",async(req:Request,res:Response)=>{
-        const { start, end, tag } = z.object({
+        const { start, end, tag, orderBy, orderDirection, ownerId } = z.object({
                 start:z.coerce.number(),
                 end:z.coerce.number(),
-                tag: z.string().optional()
+                tag: z.string().optional(),
+                orderBy: z.enum(['date', 'popularity', 'owner']).optional(),
+                orderDirection: z.enum(['ASC', 'DESC']).optional(),
+                ownerId: z.string().optional()
         }).parse(req.query)
-        res.status(200).json({rooms:await getRooms(start,end, tag)})
+        res.status(200).json({rooms:await getRooms(start,end, tag, orderBy, orderDirection, ownerId)})
 })
 
 

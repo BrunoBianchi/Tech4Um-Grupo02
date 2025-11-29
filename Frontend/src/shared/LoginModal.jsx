@@ -24,6 +24,7 @@ export default function LoginModal({ isOpen, onClose }) {
       if (mode === 'login') {
         await login(formData.email, formData.password).then((u) => {
           console.log(u)
+          onClose(); // Close modal on success
         })
 
       } else if (mode === 'register') {

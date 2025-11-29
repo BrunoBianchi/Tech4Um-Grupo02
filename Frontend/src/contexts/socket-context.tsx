@@ -1,6 +1,7 @@
 import { createContext, useState, useEffect } from "react";
 import { io, Socket } from "socket.io-client";
 import { useAuth } from "../hooks/auth-hook";
+import { getCookie } from "../utils/cookie";
 
 interface SocketContextData {
   isConnected: boolean;
@@ -19,7 +20,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
   const { signed } = useAuth();
 
   function connect(token: string) {
-    if (socket) return; 
+    if (socket) return;
 
     const newSocket = io("http://localhost:3000", {
       auth: {
@@ -52,7 +53,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     if (signed && !isConnected && !socket) {
-      const token = localStorage.getItem('@App:token');
+      const token = getCookie('@App:token');
       if (token) {
         connect(token);
       }

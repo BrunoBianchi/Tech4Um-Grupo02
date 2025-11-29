@@ -19,20 +19,16 @@ export const getRoomMessages = async (req: any, res: any) => {
     const roomId = req.params.roomId as string;
     const userId = res.locals.user?.id;
 
-    console.log(`[API] getRoomMessages called for roomId: ${roomId}, userId: ${userId}`);
     if (!roomId) return res.status(400).json({ error: 'Missing roomId' });
     
     const messageRepo = AppDataSource.getRepository(MessageEntity);
-    
-    // Query: Public messages OR Private messages where user is sender OR recipient
-    // If no userId (shouldn't happen with authMiddleware), show only public
     const whereCondition: any[] = [
-        { room: { id: roomId }, destination: IsNull() } // Public
+        { room: { id: roomId }, destination: IsNull() } 
     ];
 
     if (userId) {
-        whereCondition.push({ room: { id: roomId }, destination: { id: userId } }); // Received private
-        whereCondition.push({ room: { id: roomId }, user: { id: userId }, destination: Not(IsNull()) }); // Sent private
+        whereCondition.push({ room: { id: roomId }, destination: { id: userId } }); 
+        whereCondition.push({ room: { id: roomId }, user: { id: userId }, destination: Not(IsNull()) });
     }
 
     const messages = await messageRepo.find({
@@ -41,7 +37,6 @@ export const getRoomMessages = async (req: any, res: any) => {
         order: { createdAt: 'ASC' }
     });
     
-    console.log(`[API] Found ${messages.length} messages for room ${roomId}`);
 
     res.json(messages.map(m => ({
         id: m.id,
@@ -54,23 +49,51 @@ export const getRoomMessages = async (req: any, res: any) => {
     })));
 };
 
-export const getRooms = async (start: number, end: number, tag?: string) => {
+export const getRooms = async (
+    start: number, 
+    end: number, 
+    tag?: string,
+    orderBy: 'date' | 'popularity' | 'owner' = 'popularity',
+    orderDirection: 'ASC' | 'DESC' = 'DESC',
+    ownerId?: string
+) => {
     const skip = start;
     const take = end;
 
-    // 1. Obter IDs das salas ordenadas pela quantidade de usuários
     let qb = roomRepository.createQueryBuilder("room")
         .leftJoin("room.users", "user")
+        .leftJoin("room.owner", "owner") 
         .select("room.id", "id")
         .addSelect("COUNT(user.id)", "user_count")
         .groupBy("room.id")
-        .orderBy("user_count", "DESC")
-        .addOrderBy("room.id", "ASC") // Desempate
+        .addGroupBy("owner.name")
+        .addGroupBy("room.createdAt") 
         .offset(skip)
         .limit(take);
 
     if (tag) {
         qb = qb.where(":tag = ANY(room.tags)", { tag });
+    }
+
+    if (ownerId) {
+        qb = qb.andWhere("owner.id = :ownerId", { ownerId });
+    }
+
+    switch (orderBy) {
+        case 'date':
+            qb = qb.orderBy("room.createdAt", orderDirection);
+            break;
+        case 'owner':
+            qb = qb.orderBy("owner.name", orderDirection);
+            break;
+        case 'popularity':
+        default:
+            qb = qb.orderBy("user_count", orderDirection);
+            qb = qb.addOrderBy("room.id", "ASC"); 
+            break;
+    }
+    if (orderBy !== 'popularity') {
+         qb = qb.addOrderBy("room.id", "ASC");
     }
 
     const rawResults = await qb.getRawMany();
@@ -79,14 +102,12 @@ export const getRooms = async (start: number, end: number, tag?: string) => {
 
     const ids = rawResults.map(r => r.id);
 
-    // 2. Buscar as salas completas com as relações
     const rooms = await roomRepository.createQueryBuilder("room")
         .leftJoinAndSelect("room.owner", "owner")
         .leftJoinAndSelect("room.users", "users")
         .where("room.id IN (:...ids)", { ids })
         .getMany();
 
-    // 3. Reordenar em memória para garantir a ordem correta
     rooms.sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id));
 
     return rooms;
@@ -110,13 +131,11 @@ export const getUserFromRoomById =  async(roomId:string,userId:string):Promise<P
 export const getSimilarRooms = async (roomId: string) => {
     const currentRoom = await roomRepository.findOneBy({ id: roomId });
     
-    // If room not found or no tags, return popular rooms as fallback
     if (!currentRoom || !currentRoom.tags || currentRoom.tags.length === 0) {
         return getRooms(0, 5);
     }
 
-    // Find rooms that share tags, excluding current room
-    // Using Postgres array overlap operator &&
+
     const similarRooms = await roomRepository.createQueryBuilder("room")
         .leftJoinAndSelect("room.users", "users")
         .where("room.id != :roomId", { roomId })
@@ -124,10 +143,8 @@ export const getSimilarRooms = async (roomId: string) => {
         .take(5)
         .getMany();
 
-    // If few matches, fill with popular rooms
     if (similarRooms.length < 5) {
         const popular = await getRooms(0, 5 - similarRooms.length);
-        // Filter out duplicates
         const existingIds = new Set(similarRooms.map(r => r.id));
         existingIds.add(roomId);
         

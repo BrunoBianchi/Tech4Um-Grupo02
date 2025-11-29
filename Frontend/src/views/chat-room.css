@@ -79,6 +79,9 @@
   border-radius: 10px;
   cursor: pointer;
   transition: background 0.2s;
+  position: relative;
+  /* For tooltip positioning context */
+  justify-content: space-between;
 }
 
 .participant-item:hover {
@@ -99,6 +102,7 @@
   position: relative;
   width: 32px;
   height: 32px;
+  flex-shrink: 0;
 }
 
 .participant-avatar {
@@ -125,6 +129,69 @@
   overflow: hidden;
   text-overflow: ellipsis;
   flex: 1;
+}
+
+/* Participant Hover Actions & Tooltip */
+.participant-hover-actions {
+  display: flex;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.2s;
+  position: relative;
+}
+
+.participant-item:hover .participant-hover-actions {
+  opacity: 1;
+}
+
+.pm-icon {
+  color: #1b75d1;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+  cursor: pointer;
+}
+
+.pm-icon:hover {
+  opacity: 1;
+}
+
+.pm-tooltip {
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  /* Position to the right of the icon */
+  transform: translateY(-50%);
+  background-color: #333;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 1000;
+  margin-left: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s;
+}
+
+.pm-icon:hover+.pm-tooltip {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Tooltip arrow */
+.pm-tooltip::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 100%;
+  /* Arrow on the left side of tooltip */
+  margin-top: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: transparent #333 transparent transparent;
 }
 
 /* Message Styles */
@@ -233,6 +300,18 @@
   padding-top: 10px;
 }
 
+.message-gif {
+  max-width: 200px;
+  border-radius: 10px;
+}
+
+.message-time {
+  font-size: 0.75rem;
+  color: #aeb0b6;
+  margin-left: 8px;
+  font-weight: 400;
+}
+
 /* INPUT AREA */
 .chat-input-area {
   background-color: #c2410c;
@@ -338,6 +417,139 @@
 .room-info {
   font-size: 11px;
   opacity: 0.7;
+}
+
+/* MENTIONS */
+.mention {
+  background-color: #c9cdfb;
+  /* Lighter purple/blue */
+  color: #5865F2;
+  border-radius: 4px;
+  padding: 2px 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.mention:hover {
+  background-color: #5865F2;
+  color: white;
+  text-decoration: none;
+}
+
+.message-item.mentioned {
+  background-color: rgba(250, 166, 26, 0.1);
+  /* Yellow tint */
+  position: relative;
+}
+
+.message-item.mentioned::before {
+  content: "";
+  position: absolute;
+  left: -20px;
+  /* Pull outside padding */
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background-color: #faa61a;
+  /* Orange bar */
+}
+
+/* Ensure the message bubble inside a mentioned row still looks good */
+.message-item.mentioned .message-text {}
+
+.mention-popup {
+  position: absolute;
+  bottom: 100%;
+  left: 20px;
+  margin-bottom: 10px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+  width: 250px;
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #eee;
+}
+
+.mention-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.mention-option:hover {
+  background-color: #f5f5f5;
+}
+
+.mention-option span {
+  font-size: 13px;
+  color: #333;
+  font-weight: 500;
+}
+
+/* PICKERS */
+.picker-container {
+  position: absolute;
+  bottom: 100%;
+  right: 20px;
+  margin-bottom: 10px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+  overflow: hidden;
+  width: 320px;
+}
+
+.gif-picker {
+  padding: 10px;
+  height: 350px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.gif-search-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  outline: none;
+}
+
+.gif-grid {
+  flex: 1;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.gif-item {
+  width: 100%;
+  height: auto;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.gif-item:hover {
+  transform: scale(1.05);
+}
+
+.action-icon {
+  font-size: 20px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.action-icon:hover {
+  transform: scale(1.2);
 }
 
 /* RESPONSIVE */
@@ -455,541 +667,4 @@
     display: none;
     /* Hide extra actions on very small screens to save space */
   }
-}
-
-/* MENTIONS */
-.mention {
-  background-color: #c9cdfb;
-  /* Lighter purple/blue */
-  color: #5865F2;
-  border-radius: 4px;
-  padding: 2px 4px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.mention:hover {
-  background-color: #5865F2;
-  color: white;
-  text-decoration: none;
-}
-
-.message-item.mentioned {
-  background-color: rgba(250, 166, 26, 0.1);
-  /* Yellow tint */
-  position: relative;
-}
-
-.message-item.mentioned::before {
-  content: "";
-  position: absolute;
-  left: -20px;
-  /* Pull outside padding */
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background-color: #faa61a;
-  /* Orange bar */
-}
-
-/* Ensure the message bubble inside a mentioned row still looks good */
-.message-item.mentioned .message-text {}
-
-.mention-option span {
-  font-size: 13px;
-  color: #333;
-  font-weight: 500;
-}
-
-/* PICKERS */
-.picker-container {
-  position: absolute;
-  bottom: 100%;
-  right: 20px;
-  margin-bottom: 10px;
-  background: white;
-  border-radius: 10px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
-  z-index: 100;
-  overflow: hidden;
-  width: 320px;
-}
-
-.gif-picker {
-  padding: 10px;
-  height: 350px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.gif-search-input {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  outline: none;
-}
-
-.gif-grid {
-  flex: 1;
-  overflow-y: auto;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
-}
-
-.gif-item {
-  width: 100%;
-  height: auto;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: transform 0.2s;
-}
-
-.gif-item:hover {
-  transform: scale(1.05);
-}
-
-.action-icon {
-  font-size: 20px;
-  cursor: pointer;
-  transition: transform 0.2s;
-}
-
-.mobile-tab.active {
-  background: #1b75d1;
-  color: white;
-  border-color: #1b75d1;
-  font-weight: 600;
-}
-
-@media (max-width: 1024px) {
-  .chat-sidebar-right {
-    width: 200px;
-    /* Shrink slightly */
-  }
-
-  .chat-sidebar-left {
-    width: 240px;
-    /* Shrink slightly */
-  }
-}
-
-@media (max-width: 900px) {
-
-  /* Tablet Mode - Maybe hide right sidebar or stack? 
-     For now, let's keep the 3-col layout but tighter, 
-     or switch to mobile view earlier if too tight.
-  */
-  .chat-sidebar-right {
-    display: none;
-    /* Hide rooms on tablet, can be accessed via other means if needed */
-  }
-}
-
-@media (max-width: 768px) {
-  .chat-container {
-    padding: 10px;
-    height: 100dvh;
-    /* Use dynamic viewport height for mobile browsers */
-  }
-
-  .chat-header-nav {
-    margin-bottom: 10px;
-  }
-
-  .mobile-tabs {
-    display: flex;
-  }
-
-  /* Hide all columns by default on mobile */
-  .chat-sidebar-left,
-  .chat-main,
-  .chat-sidebar-right {
-    display: none;
-    width: 100%;
-    height: 100%;
-    margin: 0;
-  }
-
-  /* Show only the active one */
-  .chat-sidebar-left.mobile-visible,
-  .chat-main.mobile-visible,
-  .chat-sidebar-right.mobile-visible {
-    display: flex;
-  }
-
-  /* Adjustments for mobile views */
-  .chat-sidebar-left {
-    background: transparent;
-    box-shadow: none;
-    padding: 0;
-  }
-
-  .participants-list {
-    background: white;
-    border-radius: 20px;
-    padding: 15px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-  }
-
-  .chat-sidebar-right {
-    background: white;
-    border-radius: 20px;
-    padding: 15px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-    overflow-y: auto;
-  }
-
-  .chat-input-area {
-    padding: 15px;
-  }
-
-  .input-actions {
-    display: none;
-    /* Hide extra actions on very small screens to save space */
-  }
-}
-
-/* MENTIONS */
-.mention {
-  background-color: #c9cdfb;
-  /* Lighter purple/blue */
-  color: #5865F2;
-  border-radius: 4px;
-  padding: 2px 4px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.mention:hover {
-  background-color: #5865F2;
-  color: white;
-  text-decoration: none;
-}
-
-.message-item.mentioned {
-  background-color: rgba(250, 166, 26, 0.1);
-  /* Yellow tint */
-  position: relative;
-}
-
-.message-item.mentioned::before {
-  content: "";
-  position: absolute;
-  left: -20px;
-  /* Pull outside padding */
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background-color: #faa61a;
-  /* Orange bar */
-}
-
-/* Ensure the message bubble inside a mentioned row still looks good */
-.message-item.mentioned .message-text {}
-
-.mention-option span {
-  font-size: 13px;
-  color: #333;
-  font-weight: 500;
-}
-
-/* PICKERS */
-.picker-container {
-  position: absolute;
-  bottom: 100%;
-  right: 20px;
-  margin-bottom: 10px;
-  background: white;
-  border-radius: 10px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
-  z-index: 100;
-  overflow: hidden;
-  width: 320px;
-}
-
-.gif-picker {
-  padding: 10px;
-  height: 350px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.gif-search-input {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  outline: none;
-}
-
-.gif-grid {
-  flex: 1;
-  overflow-y: auto;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
-}
-
-.gif-item {
-  width: 100%;
-  height: auto;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: transform 0.2s;
-}
-
-.gif-item:hover {
-  transform: scale(1.05);
-}
-
-.action-icon {
-  font-size: 20px;
-  cursor: pointer;
-  transition: transform 0.2s;
-}
-
-.action-icon:hover {
-  transform: scale(1.2);
-}
-
-
-
-@media (max-width: 1024px) {
-  .chat-sidebar-right {
-    width: 200px;
-    /* Shrink slightly */
-  }
-
-  .chat-sidebar-left {
-    width: 240px;
-    /* Shrink slightly */
-  }
-}
-
-@media (max-width: 900px) {
-
-  /* Tablet Mode - Maybe hide right sidebar or stack? 
-     For now, let's keep the 3-col layout but tighter, 
-     or switch to mobile view earlier if too tight.
-  */
-  .chat-sidebar-right {
-    display: none;
-    /* Hide rooms on tablet, can be accessed via other means if needed */
-  }
-}
-
-@media (max-width: 768px) {
-  .chat-container {
-    padding: 10px;
-    height: 100dvh;
-    /* Use dynamic viewport height for mobile browsers */
-  }
-
-  .chat-header-nav {
-    margin-bottom: 10px;
-  }
-
-  .mobile-tabs {
-    display: flex;
-  }
-
-  /* Hide all columns by default on mobile */
-  .chat-sidebar-left,
-  .chat-main,
-  .chat-sidebar-right {
-    display: none;
-    width: 100%;
-    height: 100%;
-    margin: 0;
-  }
-
-  /* Show only the active one */
-  .chat-sidebar-left.mobile-visible,
-  .chat-main.mobile-visible,
-  .chat-sidebar-right.mobile-visible {
-    display: flex;
-  }
-
-  /* Adjustments for mobile views */
-  .chat-sidebar-left {
-    background: transparent;
-    box-shadow: none;
-    padding: 0;
-  }
-
-  .participants-list {
-    background: white;
-    border-radius: 20px;
-    padding: 15px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-  }
-
-  .chat-sidebar-right {
-    background: white;
-    border-radius: 20px;
-    padding: 15px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-    overflow-y: auto;
-  }
-
-  .chat-input-area {
-    padding: 15px;
-  }
-
-  .input-actions {
-    display: none;
-    /* Hide extra actions on very small screens to save space */
-  }
-}
-
-/* MENTIONS */
-.mention {
-  background-color: #c9cdfb;
-  /* Lighter purple/blue */
-  color: #5865F2;
-  border-radius: 4px;
-  padding: 2px 4px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.mention:hover {
-  background-color: #5865F2;
-  color: white;
-  text-decoration: none;
-}
-
-.message-item.mentioned {
-  background-color: rgba(250, 166, 26, 0.1);
-  /* Yellow tint */
-  position: relative;
-}
-
-.message-item.mentioned::before {
-  content: "";
-  position: absolute;
-  left: -20px;
-  /* Pull outside padding */
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background-color: #faa61a;
-  /* Orange bar */
-}
-
-/* Ensure the message bubble inside a mentioned row still looks good */
-.message-item.mentioned .message-text {}
-
-.mention-option span {
-  font-size: 13px;
-  color: #333;
-  font-weight: 500;
-}
-
-/* PICKERS */
-.picker-container {
-  position: absolute;
-  bottom: 100%;
-  right: 20px;
-  margin-bottom: 10px;
-  background: white;
-  border-radius: 10px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
-  z-index: 100;
-  overflow: hidden;
-  width: 320px;
-}
-
-.gif-picker {
-  padding: 10px;
-  height: 350px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.gif-search-input {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  outline: none;
-}
-
-.gif-grid {
-  flex: 1;
-  overflow-y: auto;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
-}
-
-.gif-item {
-  width: 100%;
-  height: auto;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: transform 0.2s;
-}
-
-.gif-item:hover {
-  transform: scale(1.05);
-}
-
-.action-icon {
-  font-size: 20px;
-  cursor: pointer;
-  transition: transform 0.2s;
-}
-
-.action-icon:hover {
-  transform: scale(1.2);
-}
-
-.message-gif {
-  max-width: 200px;
-  border-radius: 10px;
-}
-
-.message-time {
-  font-size: 0.75rem;
-  color: #aeb0b6;
-  margin-left: 8px;
-  font-weight: 400;
-}
-
-/* MENTION POPUP */
-.mention-popup {
-  position: absolute;
-  bottom: 100%;
-  left: 20px;
-  margin-bottom: 10px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
-  z-index: 100;
-  width: 250px;
-  max-height: 200px;
-  overflow-y: auto;
-  border: 1px solid #eee;
-}
-
-.mention-option {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 12px;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.mention-option:hover {
-  background-color: #f5f5f5;
 }
