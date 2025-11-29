@@ -13,6 +13,7 @@ Documentação técnica completa do backend da aplicação **Tech4Um**, um forum
     - [Services Funcionais](#services-funcionais)
 - [Stack Tecnológica do Backend](#stack-tecnológica-do-backend)
 - [Configuração do Ambiente](#configuração-do-ambiente)
+- [Deploy e Infraestrutura](#deploy-e-infraestrutura)
 - [Banco de Dados](#banco-de-dados)
     - [Entidades](#entidades)
 - [Sistema de Autenticação](#sistema-de-autenticação)
@@ -153,6 +154,7 @@ O projeto foi concebido para criar um sistema de fórum em tempo real que suport
 6. **Segurança**
     - **Validação de Dados:** Schemas Zod garantem que apenas dados no formato correto cheguem aos services.
     - **Sanitização:** Prevenção básica contra injeção via ORM e validação de tipos.
+    - **Proteção XSS com Cookies:** A utilização de cookies com as flags `HttpOnly` e `Secure` é crucial para mitigar vulnerabilidades de Cross-Site Scripting (XSS). Ao contrário do `localStorage` ou `sessionStorage`, cookies configurados desta maneira não podem ser acessados via JavaScript (document.cookie), impedindo que scripts maliciosos injetados na aplicação roubem o token de autenticação do usuário.
 
 ---
 
@@ -164,6 +166,9 @@ O projeto foi concebido para criar um sistema de fórum em tempo real que suport
 - **TypeORM**: ORM para PostgreSQL.
 - **PostgreSQL**: Banco de dados relacional.
 - **Zod**: Validação de dados.
+- **Nginx**: Servidor Web e Proxy Reverso para deploy.
+- **Digital Ocean Droplet**: Infraestrutura de hospedagem (VPS).
+- **Let's Encrypt**: Certificados SSL/TLS gratuitos para HTTPS.
 
 ---
 
@@ -181,6 +186,41 @@ pnpm install
 ```env
 PORT=3000
 # Configurações do Banco de Dados e JWT
+```
+
+---
+
+## Deploy e Infraestrutura
+
+O projeto utiliza Nginx como proxy reverso para gerenciar subdomínios e SSL. Abaixo está a configuração utilizada para rodar a aplicação em `api.tech4um.xyz` (Backend) e `tech4um.xyz` (Frontend).
+
+```nginx
+server {
+    listen 80;
+    server_name api.tech4um.xyz;
+
+    # Backend sem HTTPS ainda
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+
+server {
+    listen 80;
+    server_name tech4um.xyz www.tech4um.xyz;
+
+    location / {
+        proxy_pass http://localhost:3000;  # coloque a porta da sua aplicação Docker
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
 ```
 
 ---
