@@ -2,6 +2,7 @@
 
 Este Repositório contém os códigos e especificações técnicas referentes ao 
 desenvolvimento do MVP Tech4Um (Forum de mensagens em tempo real) para desafio **Dev - Ninja Startup Job 2026**.
+O site está em deploy na url [tech4um](https://tech4um.xyz)
 
 ---
 
