@@ -1,12 +1,14 @@
 # Tech4Um
 
-Real-time forum and messaging MVP — **1st place @ Hackathon Ninja 2026** (team of 3). Rooms, Socket.IO chat and JWT auth, shipped as a Dockerized full-stack app.
+Real-time forum and messaging MVP built by a team of 3 in a hackathon. Rooms, Socket.IO chat and JWT auth, shipped as a Dockerized full-stack app.
 
-Deployed demo (when live): [tech4um.xyz](https://tech4um.xyz)
+> 🏆 **1st place at Hackathon Ninja Startup Job 2026.**
+
+The hackathon deployment ([tech4um.xyz](https://tech4um.xyz)) is currently offline. Run it locally with Docker Compose (below).
 
 ## Problem
 
-Hackathon brief: deliver a usable online forum with live chat under tight time constraints. The MVP focuses on identity, rooms and low-latency messaging — with extras (tags, mentions, typing indicators, online status) that make the product feel complete rather than a bare chat socket.
+Hackathon brief: deliver a usable online forum with live chat under tight time constraints. The MVP focuses on identity, rooms and low-latency messaging, with extras (tags, mentions, typing indicators, online status) that make the product feel complete rather than a bare chat socket.
 
 ## Features
 
@@ -31,13 +33,13 @@ Hackathon brief: deliver a usable online forum with live chat under tight time c
 
 ```
 Backend/     Express + Socket.IO, MSC-style services, TypeORM entities
-Frontend/    Vite SPA — auth/rooms/socket contexts and screens
+Frontend/    Vite SPA: auth/rooms/socket contexts and screens
 docker-compose.yml
 ```
 
 ## Architecture notes
 
-Backend follows an MSC (Model–Service–Controller) layout. REST handles auth and room CRUD; Socket.IO carries live messages after a JWT handshake with Express. Frontend state is split across auth, rooms and socket React contexts.
+Backend follows an MSC (Model-Service-Controller) layout. REST handles auth and room CRUD; Socket.IO carries live messages after a JWT handshake with Express. Frontend state is split across auth, rooms and socket React contexts.
 
 Design reference: [Figma](https://www.figma.com/design/FDYqPAYNQTwOnHf0wME0HR/4UM). Dedicated notes live under [`Backend/`](./Backend) and [`Frontend/`](./Frontend).
 
@@ -54,7 +56,7 @@ docker compose up
 
 - Frontend: `http://localhost:5173`
 - Backend: `http://localhost:3000`
-- PostgreSQL: `http://localhost:5432` (or as in `docker-compose.yml`)
+- PostgreSQL: `localhost:5432` (or as in `docker-compose.yml`)
 
 ```bash
 docker compose down   # stop
@@ -62,5 +64,5 @@ docker compose down   # stop
 
 ## Author
 
-**Bruno Bianchi** — Full-Stack Developer (team of 3)  
-[github.com/BrunoBianchi](https://github.com/BrunoBianchi) · [brunobianchi.dev](https://brunobianchi.dev)
+**Bruno Bianchi**, Computer Engineering student at UNIFEI (team of 3)  
+[github.com/BrunoBianchi](https://github.com/BrunoBianchi) · [bruno.raiadobian@gmail.com](mailto:bruno.raiadobian@gmail.com)
